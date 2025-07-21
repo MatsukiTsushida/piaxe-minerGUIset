@@ -4,6 +4,7 @@ from PyQt5.QtGui import QIcon
 from ruamel.yaml import YAML
 import sys
 import os
+import signal
 
 
 
