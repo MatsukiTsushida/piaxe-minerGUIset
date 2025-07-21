@@ -1,6 +1,6 @@
 # THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT) 
 
-## !Before setting up make sure you have Python on your machine!
+
 
 ## Linux
 1. Pull the repository
