@@ -1,3 +1,66 @@
+# THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT) 
+
+## !Before setting up make sure you have Python on your machine!
+
+## Linux
+1. Pull the repository
+2. Open it in any code editor (I use Zed)
+3. Run GUI.py
+
+### Or run
+
+```
+# install pip3 sudo apt install python3-pip
+
+# clone repository
+git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
+cd piaxe-miner
+
+# and install requirements
+pip3 install -r requirements.txt --break-system-packages
+
+# copy example files
+cp config.yml.example config.yml
+cp start_mainnet_publicpool_example.sh start.sh
+
+```
+
+## Windows
+
+1. Install WSL on your windows machine (https://learn.microsoft.com/en-us/windows/wsl/install-on-server)
+2. Set it up and get any Debian based Distro
+3. Install usbipd-win (https://github.com/dorssel/usbipd-win/releases/tag/v5.1.0)
+4. Usbipd is needed to hook up your miners to wsl
+5. Run terminal as administrator and type ``` usbipd list ```. This will list all of your usb devices
+### <img width="946" height="238" alt="image" src="https://github.com/user-attachments/assets/c769f0fb-9ae0-4f3c-ad68-ac2eb425a4e0" />
+6. In this case my microcopntrollers are shared however if you are doing this the first time you need to share them first with ``` usbipd bind --busid <BUSID of usb> ```
+7. Next step is to attach the usb device to WSL with ``` usbipd attach --wsl --busid <BUSID of usb> ```
+8. After imputing ``` usbipd list ``` you should now see that they are attached:
+### <img width="871" height="191" alt="image" src="https://github.com/user-attachments/assets/5c1bfd59-83f1-459a-a3a6-3f240b377062" />
+9. Run terminal and start WSL by running ``` wsl.exe ```
+10. Run
+```
+# install pip3 sudo apt install python3-pip
+
+# clone repository
+git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
+cd piaxe-miner
+
+# and install requirements
+pip3 install -r requirements.txt --break-system-packages
+
+# copy example files
+cp config.yml.example config.yml
+cp start_mainnet_publicpool_example.sh start.sh
+
+```
+11. The repository should now be installed and the GUI and you can start the GUI with ``` python3 GUI.py ```
+
+
+
+# ↓ READ ME FROM THE MAIN BRANCH ↓
+
+
 # Hardware
 
 PiAxe-Miner is the software needed to run the PiAxe and QAxe.
