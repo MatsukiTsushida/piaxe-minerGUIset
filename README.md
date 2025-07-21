@@ -13,8 +13,8 @@
 sudo apt install python3-pip
 
 # clone repository
-git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
-cd piaxe-miner
+sudo git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
+cd piaxe-minerGUIset
 
 # and install requirements
 pip3 install -r requirements.txt --break-system-packages
