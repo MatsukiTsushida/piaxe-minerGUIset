@@ -10,6 +10,12 @@
 ### Or run
 
 ```
+sudo apt update
+sudo apt upgrade
+
+sudo apt install python3
+sudo apt install git
+
 sudo apt install python3-pip
 
 # clone repository
@@ -40,11 +46,17 @@ cp start_mainnet_publicpool_example.sh start.sh
 9. Run terminal and start WSL by running ``` wsl.exe ```
 10. Run
 ```
-# install pip3 sudo apt install python3-pip
+sudo apt update
+sudo apt upgrade
+
+sudo apt install python3
+sudo apt install git
+
+sudo apt install python3-pip
 
 # clone repository
-git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
-cd piaxe-miner
+sudo git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
+cd piaxe-minerGUIset
 
 # and install requirements
 pip3 install -r requirements.txt --break-system-packages
@@ -58,7 +70,7 @@ cp start_mainnet_publicpool_example.sh start.sh
 
 
 
-# ↓ READ ME FROM THE MAIN BRANCH ↓
+# ↓ README FROM THE MAIN BRANCH ↓
 
 
 # Hardware
