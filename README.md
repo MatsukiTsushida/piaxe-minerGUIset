@@ -10,7 +10,7 @@
 ### Or run
 
 ```
-install pip3 sudo apt install python3-pip
+sudo apt install python3-pip
 
 # clone repository
 git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
