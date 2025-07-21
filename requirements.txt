@@ -8,3 +8,5 @@ rpi_hardware_pwm==0.1.4
 smbus==1.1.post2
 google==3.0.0
 protobuf==3.20.0
+PyQt5==5.15.11
+ruamel.yaml==0.18.14
