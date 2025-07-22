@@ -13,6 +13,7 @@
 sudo apt update
 sudo apt upgrade
 
+#if no python or git installed
 sudo apt install python3
 sudo apt install git
 
