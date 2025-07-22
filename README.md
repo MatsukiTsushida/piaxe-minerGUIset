@@ -30,6 +30,8 @@ pip3 install -r requirements.txt --break-system-packages
 cp config.yml.example config.yml
 cp start_mainnet_publicpool_example.sh start.sh
 
+python3 GUI.py
+
 ```
 
 ## Windows
