@@ -40,7 +40,7 @@ cp start_mainnet_publicpool_example.sh start.sh
 4. Usbipd is needed to hook up your miners to wsl
 5. Run terminal as administrator and type ``` usbipd list ```. This will list all of your usb devices
 ### <img width="946" height="238" alt="image" src="https://github.com/user-attachments/assets/c769f0fb-9ae0-4f3c-ad68-ac2eb425a4e0" />
-6. In this case my microcopntrollers are shared however if you are doing this the first time you need to share them first with ``` usbipd bind --busid <BUSID of usb> ```
+6. In this case my microcontrollers are shared however if you are doing this the first time you need to share them first with ``` usbipd bind --busid <BUSID of usb> ```
 7. Next step is to attach the usb device to WSL with ``` usbipd attach --wsl --busid <BUSID of usb> ```
 8. After imputing ``` usbipd list ``` you should now see that they are attached:
 ### <img width="871" height="191" alt="image" src="https://github.com/user-attachments/assets/5c1bfd59-83f1-459a-a3a6-3f240b377062" />
