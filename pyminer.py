@@ -409,6 +409,7 @@ class Miner(SimpleJsonRpcClient):
         self._accepted_shares += 1
         self._miner.accepted_callback()
         logging.info('Accepted shares: %d' % self._accepted_shares)
+        print(self._accepted_shares)
 
       # ??? *shrug*
       else:
@@ -584,5 +585,3 @@ if __name__ == '__main__':
     logging.debug("error received")
     pyminer.stop()
     time.sleep(5)
-
-

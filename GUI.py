@@ -1,7 +1,12 @@
-from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QMainWindow, QPushButton, QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, QDial, QLabel, QGridLayout
+from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QMainWindow, QPushButton, QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, QDial, QLabel, QGridLayout, QDialogButtonBox, QDialog, QMessageBox
 from PyQt5.QtCore import QSize, QThread, Qt, QProcess
 from PyQt5.QtGui import QIcon
+import psycopg2
+from psycopg2 import sql, Error
+import pandas as pd
+from contextlib import contextmanager
 from ruamel.yaml import YAML
+from datetime import datetime
 import sys
 import os
 import signal
@@ -9,9 +14,63 @@ import signal
 
 
 
+# Database connection parameters
+DB_CONFIG = {
+    'host': 'localhost',  # Change if your PostgreSQL is on a different host
+    'database': 'postgres',
+    'user': 'postgres',  # Change if you have a different username
+    'password': '1324',
+    'port': 5432
+}
 
-class MainWindow(QMainWindow):
+flag = None
+
+class PostgresDialog(QDialog):
     def __init__(self):
+        super().__init__()
+        # self.main_window = main_window
+        self.setWindowTitle("Connect to Postgres?")
+        self.setFixedSize(300, 150)
+        self.setModal(True)
+        self.flag = False
+        self.show = False
+
+        # Create layout
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # Create button layout
+        button_layout = QHBoxLayout()
+
+        # Create buttons
+        yes_button = QPushButton("Yes")
+        no_button = QPushButton("No")
+
+        yes_button.clicked.connect(self.show_main_window)
+        no_button.clicked.connect(self.close_application)
+
+         # Add buttons to layout
+        button_layout.addWidget(yes_button)
+        button_layout.addWidget(no_button)
+
+        # Add widgets to main layout
+        layout.addLayout(button_layout)
+
+    def show_main_window(self):
+        print("Hell yeah")
+        self.accept()
+        # self.main_window.show()
+
+    def close_application(self):
+        print("WTF")
+        self.reject()
+        # self.main_window.show()
+    def flag (self):
+        return flag
+
+#Setting up the AppWindow and fucntionality
+class MainWindow(QMainWindow):
+    def __init__(self, flag=False):
         super().__init__()
         self.p = None
         self.k = None
@@ -19,7 +78,33 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('axe.jpg'))
         self.resize(QSize(800, 800))
         self.list = [300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575]
+        self.flag = flag
+        print(f'The flag is ${self.flag}')
 
+        # try:
+        #     self.conn = psycopg2.connect(
+        #         dbname = "postgres",
+        #         user = "postgres",
+        #         password = "1324",
+        #         host = "localhost",
+        #         port = 5432
+        #     )
+        #     self.cur = self.conn.cursor()
+        #     print("Connection successful")
+        # except Error as e:
+        #     print(f"Error connecting to PostgreSQL: {e}")
+        #     return False
+        self.hash = None
+        self.tempset = None
+        self.hash2 = None
+        self.tempset2 = None
+
+
+        self.buttonBox = QMessageBox()
+        self.buttonBox.setText("Do you want to add a DataBase for Grafana?")
+        self.buttonBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        self.buttonBox.accepted.connect(self.pressed_ok)
+        self.buttonBox.rejected.connect(self.pressed_cancel)
 
 
         # Create central widget and layout
@@ -153,6 +238,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.output_text)
         layout.addWidget(self.output_text2)
 
+
         with open('config.yml', 'r') as f:
             yaml = YAML()
             data = yaml.load(f)
@@ -166,6 +252,32 @@ class MainWindow(QMainWindow):
             self.freq2.setText(str(data["qaxe"]["asic_frequency"]) + 'Mhz')
             self.dial2.setValue(data["qaxe"]["asic_frequency"])
 
+    def connect_post(self):
+        if self.flag:
+            try:
+                self.conn = psycopg2.connect(
+                    dbname = "postgres",
+                    user = "postgres",
+                    password = "1324",
+                    host = "localhost",
+                    port = 5432
+                )
+                self.cur = self.conn.cursor()
+                print("Connection successful")
+            except Error as e:
+                print(f"Error connecting to PostgreSQL: {e}")
+                return False
+
+
+    def pressed_ok(self):
+        self.flag = True
+        print(self.flag)
+    def pressed_cancel(self):
+        self.flag = False
+        print(self.flag)
+
+
+
     def value1(self):
         entry = self.dial.value()
         self.dial.setValue(min(self.list, key=lambda x: abs(x - entry)))
@@ -177,6 +289,7 @@ class MainWindow(QMainWindow):
         self.freq2.setText(str(self.dial2.value()) + 'Mhz')
 
     def change1(self):
+        print(self.flag)
         self.output_text.append('Recalibrating frequency for worker 2 wait...')
         if self.p is None:
             # a = self.c_speed1.text()
@@ -230,7 +343,7 @@ class MainWindow(QMainWindow):
             # Method 1: Use QProcess.start() with separate arguments
             program = "python3"
             arguments = ["pyminer.py", "-o", "stratum+tcp://de.kano.is:3333",
-                        "-u", "flowsolve.worker2", "-p", "X", "-c", "config2.yml"]
+                        "-u", "flowsolve.worker2", "-p", "X", "-c", "config.yml"]
 
             self.p.start(program, arguments)
             self.pid1 = self.p.processId()
@@ -259,7 +372,7 @@ class MainWindow(QMainWindow):
             # Method 1: Use QProcess.start() with separate arguments
             program = "python3"
             arguments = ["pyminer.py", "-o", "stratum+tcp://de.kano.is:3333",
-                        "-u", "flowsolve.worker3", "-p", "X", "-c", "config.yml"]
+                        "-u", "flowsolve.worker3", "-p", "X", "-c", "config2.yml"]
 
             self.k.start(program, arguments)
             self.pid2 = self.k.processId()
@@ -291,25 +404,60 @@ class MainWindow(QMainWindow):
     def handle_stderr(self):
         data = self.p.readAllStandardError()
         stderr = bytes(data).decode("utf8")
+        if 'HASH RATE' in stderr:
+            print(stderr + 'WHAT THE FUCK IS THIS SHIT!!!!!!!!!!!!!!!!!!!!!!!!!')
+            a = stderr[33:]
+            print(a + 'SONIC THE MANIC!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            if 'INFO' not in a:
+                for i in range(len(a)):
+                    if a[i] == '$':
+                        print(a[i+1] + '??????????????????????????????')
+                        res = a[i+1:].split(' ')
+                        # self.cur.execute("INSERT INTO grafana (hash) VALUES (%s);", (float(res[0]),))
+                        # self.conn.commit()
+                        self.hash = float(res[0])
+                        print('THIS IS THE MOTHEFUCKING RES FOR HASH??????????????????????????????')
+                        break
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
+            print(stderr + 'HERE IS THE FULL ')
             if 'INFO' not in a:
-                print(a)
+                print(a + 'HERE IS THE CUT')
                 for i in range(len(a)):
                     if a[i] == 'N':
                         res = [float(i) for i in a[:i-2].split(', ')]
+                        type(res[0])
+                        self.tempset = res[0]
                         print(res)
                         break
                 # self.temp_out1.setText(str((res[0] + res[1]) / 2))
                 self.temp_out11.setText(str(res[0]) + " °C")
                 self.temp_out12.setText(str(res[1]) + " °C")
-
+        if self.hash != None and self.tempset != None and self.flag == True:
+            self.cur.execute("INSERT INTO grafana (temp, hash) VALUES (%s, %s);", (self.tempset, self.hash,))
+            self.conn.commit()
+            self.hash = None
+            self.tempset = None
         self.output_text.append(f"Error: {stderr}")
 
     def handle_stderr2(self):
         data = self.k.readAllStandardError()
         stderr = bytes(data).decode("utf8")
+        if 'HASH RATE' in stderr:
+            print(stderr + 'WHAT THE FUCK IS THIS SHIT!!!!!!!!!!!!!!!!!!!!!!!!!')
+            a = stderr[33:]
+            print(a + 'SONIC THE MANIC!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            if 'INFO' not in a:
+                for i in range(len(a)):
+                    if a[i] == '$':
+                        print(a[i+1] + '??????????????????????????????')
+                        res = a[i+1:].split(' ')
+                        # self.cur.execute("INSERT INTO grafana (hash) VALUES (%s);", (float(res[0]),))
+                        # self.conn.commit()
+                        self.hash2 = float(res[0])
+                        print('THIS IS THE MOTHEFUCKING RES FOR HASH??????????????????????????????')
+                        break
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
@@ -318,19 +466,24 @@ class MainWindow(QMainWindow):
                 for i in range(len(a)):
                     if a[i] == 'N':
                         res = [float(i) for i in a[:i-2].split(', ')]
-                        print(res)
+                        self.tempset2 = res[0]
                         break
                 # self.temp_out2.setText(str((res[0] + res[1]) / 2))
                 self.temp_out21.setText(str(res[0]) + " °C")
                 self.temp_out22.setText(str(res[1]) + " °C")
+        if self.hash2 != None and self.tempset2 != None and self.flag == True:
+            self.cur.execute("INSERT INTO grafana2 (temp2, hash2) VALUES (%s, %s);", (self.tempset2, self.hash2,))
+            self.conn.commit()
+            self.hash = None
+            self.tempset = None
         self.output_text2.append(f"Error: {stderr}")
 
     def stop_process1(self):
         if self.p:
             # os.kill(self.pid1, signal.SIGINT)
-            # self.p.terminate()
+            self.p.terminate()
             # self.p.kill()
-            # self.p.waitForFinished()
+            self.p.waitForFinished()
             self.p = None
             self.pid1 = 0
             self.btn.setText('Start mining')
@@ -341,9 +494,9 @@ class MainWindow(QMainWindow):
     def stop_process2(self):
         if self.k:
             # os.kill(self.pid2, signal.SIGINT)
-            # self.k.terminate()
-            self.k.kill()
-            # self.k.waitForFinished()
+            self.k.terminate()
+            # self.k.kill()
+            self.k.waitForFinished()
             self.k = None
             self.pid2 = 0
             self.btn3.setText('Start mining')
@@ -355,10 +508,30 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    # Create and show the dialog
+    dialog = PostgresDialog()
+    print(dialog.flag, dialog.show)
     # Use the QProcess version first
+
     window = MainWindow()
+    result = dialog.exec_()
+    print(result)
+    # Show dialog and handle the result
+    if result == QDialog.Accepted:
+        # User clicked "Yes" - main window is already shown
+        # window = MainWindow(True)
+        window.flag = True
+        window.connect_post()
+        window.show()
+        sys.exit(app.exec_())
+    elif result == QDialog.Rejected:
+        window.flag = False
+        window.show()
+        sys.exit(app.exec_())
+    else:
+        sys.exit()
 
     # window = MainWindowSubprocess()
 
-    window.show()
+    # window.show()
     app.exec()
