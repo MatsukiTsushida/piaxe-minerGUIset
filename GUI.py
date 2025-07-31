@@ -3,7 +3,6 @@ from PyQt5.QtCore import QSize, QThread, Qt, QProcess
 from PyQt5.QtGui import QIcon
 import psycopg2
 from psycopg2 import sql, Error
-import pandas as pd
 from contextlib import contextmanager
 from ruamel.yaml import YAML
 from datetime import datetime
