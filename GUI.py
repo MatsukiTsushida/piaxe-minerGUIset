@@ -1,10 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QMainWindow, QPushButton, QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, QDial, QLabel, QGridLayout, QDialogButtonBox, QDialog, QMessageBox
 from PyQt5.QtCore import QSize, QThread, Qt, QProcess
 from PyQt5.QtGui import QIcon
-import psycopg2
-from psycopg2 import sql, Error
-import pandas as pd
-from contextlib import contextmanager
 from ruamel.yaml import YAML
 from datetime import datetime
 import sys
@@ -404,26 +400,10 @@ class MainWindow(QMainWindow):
     def handle_stderr(self):
         data = self.p.readAllStandardError()
         stderr = bytes(data).decode("utf8")
-        if 'HASH RATE' in stderr:
-            #print full logging
-            print(stderr)
-            a = stderr[33:]
-            #print cut logging
-            print(a)
-            if 'INFO' not in a:
-                for i in range(len(a)):
-                    if a[i] == '$':
-                        print(a[i+1])
-                        res = a[i+1:].split(' ')
-                        self.hash = float(res[0])
-                        break
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
-            #print full logging
-            print(stderr)
             if 'INFO' not in a:
-                #print cut logging
                 print(a)
                 for i in range(len(a)):
                     if a[i] == 'N':
@@ -444,19 +424,6 @@ class MainWindow(QMainWindow):
     def handle_stderr2(self):
         data = self.k.readAllStandardError()
         stderr = bytes(data).decode("utf8")
-        if 'HASH RATE' in stderr:
-            print(stderr)
-            a = stderr[33:]
-            print(a)
-            if 'INFO' not in a:
-                for i in range(len(a)):
-                    if a[i] == '$':
-                        print(a[i+1])
-                        res = a[i+1:].split(' ')
-                        # self.cur.execute("INSERT INTO grafana (hash) VALUES (%s);", (float(res[0]),))
-                        # self.conn.commit()
-                        self.hash2 = float(res[0])
-                        break
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
