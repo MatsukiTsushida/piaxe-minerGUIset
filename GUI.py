@@ -445,18 +445,17 @@ class MainWindow(QMainWindow):
         data = self.k.readAllStandardError()
         stderr = bytes(data).decode("utf8")
         if 'HASH RATE' in stderr:
-            print(stderr + 'WHAT THE FUCK IS THIS SHIT!!!!!!!!!!!!!!!!!!!!!!!!!')
+            print(stderr)
             a = stderr[33:]
-            print(a + 'SONIC THE MANIC!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            print(a)
             if 'INFO' not in a:
                 for i in range(len(a)):
                     if a[i] == '$':
-                        print(a[i+1] + '??????????????????????????????')
+                        print(a[i+1])
                         res = a[i+1:].split(' ')
                         # self.cur.execute("INSERT INTO grafana (hash) VALUES (%s);", (float(res[0]),))
                         # self.conn.commit()
                         self.hash2 = float(res[0])
-                        print('THIS IS THE MOTHEFUCKING RES FOR HASH??????????????????????????????')
                         break
         if "temperature and voltage" in stderr:
             res = []
