@@ -414,6 +414,7 @@ class BM1366Miner:
         # Convert hash rate to GH/s
         hash_rate_ghps = hash_rate_hps / 1e9
         logging.debug("\033[32mhash rate: %f GH/s\033[0m", hash_rate_ghps)
+        logging.info(f'${hash_rate_ghps} HASH RATE')
         return hash_rate_ghps
 
     def _set_target(self, target):
@@ -537,7 +538,11 @@ class BM1366Miner:
                     # the asic uses power-of-two targets but the pool might not (eg ckpool)
                     # we should just pretend it didn't happen and not count it^^
                     if not is_valid and zeros >= pool_zeros:
+                        #FLAGGGGGGGG
                         logging.info("ignoring hash because higher than pool target")
+                        logging.info(f'${pool_zeros}')
+                        logging.info(f'${zeros}')
+                        logging.info(f'${hash}')
                         continue
 
 
@@ -566,8 +571,10 @@ class BM1366Miner:
                             self.shares.append((1, difficulty, time.time()))
 
                         self.stats.hashing_speed = self.hash_rate()
+                        logging.info(f'${self.stats.hashing_speed}')
                         hash_difficulty = shared.calculate_difficulty_from_hash(hash)
                         self.stats.best_difficulty = max(self.stats.best_difficulty, hash_difficulty)
+                        logging.info(f'${hash_difficulty} HASH DIFUCLTY' )
                         self.stats.total_best_difficulty = max(self.stats.total_best_difficulty, hash_difficulty)
 
                     # restart miner with new extranonce2
