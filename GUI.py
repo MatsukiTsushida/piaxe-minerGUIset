@@ -3,6 +3,7 @@ from PyQt5.QtCore import QSize, QThread, Qt, QProcess
 from PyQt5.QtGui import QIcon
 from ruamel.yaml import YAML
 import sys
+import psycopg2
 import os
 import signal
 
