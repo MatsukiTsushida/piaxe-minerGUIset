@@ -46,11 +46,18 @@ sudo apt-get install grafana
 # Installs the latest Enterprise release:
 sudo apt-get install grafana-enterprise
 
-#setting up postgres
-sudo apt install postgresql
+#start grafana
+sudo systemctl daemon-reload
+sudo systemctl start grafana-server
 
-#running postgres
-postgres -D /usr/local/pgsql/data >logfile 2>&1 &
+#setting up postgres
+sudo apt-get update -y
+sudo apt-get install -y postgresql postgresql-contrib
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '1324';"
+sudo sed -i 's/local   all             all                                     peer/local   all             all                                     md5/g' "/etc/postgresql/$(ls /etc/postgresql | grep -E '^1[0-9]' | sort -V | tail -n 1)/main/pg_hba.conf"
+sudo -u postgres psql -c "CREATE DATABASE postgres;"
+sudo -u postgres psql postgres < "./backup.sql"
+sudo systemctl restart postgresql
 
 python3 GUI.py
 
