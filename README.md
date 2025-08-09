@@ -59,6 +59,9 @@ sudo -u postgres psql -c "CREATE DATABASE postgres;"
 sudo -u postgres psql postgres < "./backup.sql"
 sudo systemctl restart postgresql
 
+#installing all the graphics libraries
+sudo apt-get install libgl1-mesa-glx libegl1-mesa libxcb-randr0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-sync1 libxcb-xkb1 libxcb-render-util0 libsm6 libice6
+
 python3 GUI.py
 
 ```
