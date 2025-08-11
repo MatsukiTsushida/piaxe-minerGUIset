@@ -186,3 +186,4 @@ Change `start_mainnet_publicpool_example.sh` to your needs.
 
 ### For more detailed logging
 Activate debug_bm1366 to get a more detailed output in shell.
+# QAxeMinerGUIset
