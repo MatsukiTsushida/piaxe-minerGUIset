@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QMainWindow, QPushButton, QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, QDial, QLabel, QGridLayout, QDialogButtonBox, QDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QMainWindow, QPushButton, QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, QDial, QLabel, QGridLayout, QDialogButtonBox, QDialog, QMessageBox, QFrame
 from PyQt5.QtCore import QSize, QThread, Qt, QProcess
 from PyQt5.QtGui import QIcon
 from ruamel.yaml import YAML
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('ClockEngage QAxe')
         self.setWindowIcon(QIcon('axe.jpg'))
         self.resize(QSize(800, 800))
-        self.list = [300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575]
+        self.list = [200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650]
         self.flag = flag
         print(f'The flag is ${self.flag}')
 
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         # except Error as e:
         #     print(f"Error connecting to PostgreSQL: {e}")
         #     return False
-        self.hash = None
+        self.hash = 3.6
         self.tempset = None
         self.hash2 = None
         self.tempset2 = None
@@ -109,13 +109,36 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
         layout2 = QVBoxLayout()
+        layout2.setAlignment(Qt.AlignCenter)
         layout3 = QHBoxLayout()
         layout4 = QHBoxLayout()
-        layout5 = QVBoxLayout()
-        layout6 = QVBoxLayout()
+        layout5 = QHBoxLayout()
+        layout6 = QHBoxLayout()
         layout7 = QHBoxLayout()
         layout8 = QHBoxLayout()
-        layout9 = QGridLayout()
+        layout9 = QHBoxLayout()
+        layout10 = QVBoxLayout()
+        layout11 = QVBoxLayout()
+
+        zrame = QFrame()
+        zrame.resize(1,1)
+        zrame.setFrameShadow(QFrame.Plain)
+        zrame.setFrameShape(QFrame.Box)
+        zrame.setStyleSheet("border: 2px solid black;")
+
+        yrame = QFrame()
+        yrame.resize(1,1)
+        yrame.setFrameShadow(QFrame.Plain)
+        yrame.setFrameShape(QFrame.Box)
+        yrame.setStyleSheet("border: 1px solid blue;")
+
+        xrame = QFrame()
+        xrame.resize(1,1)
+        xrame.setFrameShadow(QFrame.Plain)
+        xrame.setFrameShape(QFrame.Box)
+        xrame.setStyleSheet("border: 1px solid green;")
+
+
 
         self.pid1 = 0
         self.pid2 = 0
@@ -153,59 +176,112 @@ class MainWindow(QMainWindow):
         self.output_text.setReadOnly(True)
         self.output_text.setMaximumHeight(200)
 
-        self.output_text1 = QTextEdit()
-        self.output_text1.setReadOnly(True)
-        self.output_text1.setMaximumHeight(200)
-        self.output_text1.setMaximumWidth(200)
 
         self.output_text2 = QTextEdit()
         self.output_text2.setReadOnly(True)
         self.output_text2.setMaximumHeight(200)
         self.output_text2.setMaximumWidth(200)
 
-        self.output_text3 = QTextEdit()
-        self.output_text3.setReadOnly(True)
-        self.output_text3.setMaximumHeight(200)
-        self.output_text3.setMaximumWidth(200)
+        self.temp_out1000 = QLabel("0°C")
+        self.temp_out1000.setAlignment(Qt.AlignCenter)
+        self.temp_out1000.setMaximumHeight(15)
+        self.temp_out1000.setMaximumWidth(50)
 
-        self.output_text4 = QTextEdit()
-        self.output_text4.setReadOnly(True)
-        self.output_text4.setMaximumHeight(200)
-        self.output_text4.setMaximumWidth(200)
+        self.temp_out2000 = QLabel("0°C")
+        self.temp_out2000.setAlignment(Qt.AlignCenter)
+        self.temp_out2000.setMaximumHeight(15)
+        self.temp_out2000.setMaximumWidth(50)
 
-        self.temp_out11 = QLabel()
-        self.temp_out11.setAlignment(Qt.AlignCenter)
-        self.temp_out11.setMaximumHeight(10)
-        self.temp_out11.setMaximumWidth(100)
+        self.temp_out3000 = QLabel("0°C")
+        self.temp_out3000.setAlignment(Qt.AlignCenter)
+        self.temp_out3000.setMaximumHeight(15)
+        self.temp_out3000.setMaximumWidth(50)
 
-        self.temp_out12 = QLabel()
-        self.temp_out12.setAlignment(Qt.AlignCenter)
-        self.temp_out12.setMaximumHeight(10)
-        self.temp_out12.setMaximumWidth(100)
+        self.temp_out4000 = QLabel("0°C")
+        self.temp_out4000.setAlignment(Qt.AlignCenter)
+        self.temp_out4000.setMaximumHeight(15)
+        self.temp_out4000.setMaximumWidth(50)
 
-        self.temp_out21 = QLabel()
-        self.temp_out21.setAlignment(Qt.AlignCenter)
-        self.temp_out21.setMaximumHeight(10)
-        self.temp_out21.setMaximumWidth(100)
+        self.temp_out0100 = QLabel("0°C")
+        self.temp_out0100.setAlignment(Qt.AlignCenter)
+        self.temp_out0100.setMaximumHeight(15)
+        self.temp_out0100.setMaximumWidth(50)
 
-        self.temp_out22 = QLabel()
-        self.temp_out22.setAlignment(Qt.AlignCenter)
-        self.temp_out22.setMaximumHeight(10)
-        self.temp_out22.setMaximumWidth(100)
+        self.temp_out0200 = QLabel("0°C")
+        self.temp_out0200.setAlignment(Qt.AlignCenter)
+        self.temp_out0200.setMaximumHeight(15)
+        self.temp_out0200.setMaximumWidth(50)
+
+        self.temp_out0300 = QLabel("0°C")
+        self.temp_out0300.setAlignment(Qt.AlignCenter)
+        self.temp_out0300.setMaximumHeight(15)
+        self.temp_out0300.setMaximumWidth(50)
+
+        self.temp_out0400 = QLabel("0°C")
+        self.temp_out0400.setAlignment(Qt.AlignCenter)
+        self.temp_out0400.setMaximumHeight(15)
+        self.temp_out0400.setMaximumWidth(50)
+
+        self.temp_out0010 = QLabel("0°C")
+        self.temp_out0010.setAlignment(Qt.AlignCenter)
+        self.temp_out0010.setMaximumHeight(15)
+        self.temp_out0010.setMaximumWidth(50)
+
+        self.temp_out0020 = QLabel("0°C")
+        self.temp_out0020.setAlignment(Qt.AlignCenter)
+        self.temp_out0020.setMaximumHeight(15)
+        self.temp_out0020.setMaximumWidth(50)
+
+        self.temp_out0030 = QLabel("0°C")
+        self.temp_out0030.setAlignment(Qt.AlignCenter)
+        self.temp_out0030.setMaximumHeight(15)
+        self.temp_out0030.setMaximumWidth(50)
+
+        self.temp_out0040 = QLabel("0°C")
+        self.temp_out0040.setAlignment(Qt.AlignCenter)
+        self.temp_out0040.setMaximumHeight(15)
+        self.temp_out0040.setMaximumWidth(50)
+
+        self.temp_out0001 = QLabel("0°C")
+        self.temp_out0001.setAlignment(Qt.AlignCenter)
+        self.temp_out0001.setMaximumHeight(15)
+        self.temp_out0001.setMaximumWidth(50)
+
+        self.temp_out0002 = QLabel("0°C")
+        self.temp_out0002.setAlignment(Qt.AlignCenter)
+        self.temp_out0002.setMaximumHeight(15)
+        self.temp_out0002.setMaximumWidth(50)
+
+        self.temp_out0003 = QLabel("0°C")
+        self.temp_out0003.setAlignment(Qt.AlignCenter)
+        self.temp_out0003.setMaximumHeight(15)
+        self.temp_out0003.setMaximumWidth(50)
+
+        self.temp_out0004 = QLabel("0°C")
+        self.temp_out0004.setAlignment(Qt.AlignCenter)
+        self.temp_out0004.setMaximumHeight(15)
+        self.temp_out0004.setMaximumWidth(50)
+
+
+        rightTopFrame = QFrame()
+        rightTopFrame.resize(1,1)
+        rightTopFrame.setStyleSheet("background-color: yellow")
+
 
         self.dial = QDial()
         # self.dial.move(175, 175)
         # self.dial.setGeometry(50, 50, 50, 50)
-        self.dial.setMinimum(300)
-        self.dial.setMaximum(575)
+        self.dial.setFixedSize(300, 300)
+        self.dial.setMinimum(200)
+        self.dial.setMaximum(650)
         self.dial.setSingleStep(25)
         self.dial.valueChanged.connect(self.value1)
         self.dial.sliderReleased.connect(self.change1)
         self.dial.setNotchesVisible(True)
         self.dial2 = QDial()
-        self.dial2.setGeometry(50, 50, 50, 50)
-        self.dial2.setMinimum(300)
-        self.dial2.setMaximum(575)
+        self.dial2.setGeometry(200, 200, 200, 200)
+        self.dial2.setMinimum(200)
+        self.dial2.setMaximum(650)
         self.dial2.setSingleStep(25)
         self.dial2.valueChanged.connect(self.value2)
         self.dial2.sliderReleased.connect(self.change2)
@@ -218,7 +294,7 @@ class MainWindow(QMainWindow):
         # self.freq2.setAlignment(Qt.AlignCenter)
         # self.freq2.setMaximumHeight(50)
 
-        self.freq3 = QLabel('ClockSpeed worker2', self)
+        self.freq3 = QLabel('Clock speed dial:', self)
         self.freq3.setAlignment(Qt.AlignCenter)
         self.freq3.setMaximumHeight(50)
         # self.freq4 = QLabel('ClockSpeed worker3', self)
@@ -226,46 +302,76 @@ class MainWindow(QMainWindow):
         # self.freq4.setMaximumHeight(50)
 
 
-        # layout.addLayout(layout4)
-        # layout4.addLayout(layout2)
-        # layout4.addLayout(layout3)
-        # layout3.addLayout(layout5)
-        # layout3.addLayout(layout6)
-        # layout5.addLayout(layout9)
-        # layout5.addWidget(self.freq3)
-        # layout6.addWidget(self.freq4)
-        # layout5.addWidget(self.freq)
-        # layout6.addWidget(self.freq2)
-        # layout5.addWidget(self.dial)
-        # layout6.addWidget(self.dial2)
-        # layout7.addWidget(self.temp_out11)
-        # layout8.addWidget(self.temp_out21)
-        # layout7.addWidget(self.temp_out12)
-        # layout8.addWidget(self.temp_out22)
-        # layout5.addLayout(layout7)
-        # layout6.addLayout(layout8)
-        # layout2.addWidget(self.btn)
-        # layout2.addWidget(self.btn2)
-        # layout2.addWidget(self.btn3)
-        # layout2.addWidget(self.btn4)
-        # layout.addWidget(self.output_text)
-        # layout.addWidget(self.output_text2)
-        layout.addLayout(layout3)
-        # layout.addLayout(layout4)
-        layout.addLayout(layout7)
-        layout3.addLayout(layout2)
-        layout3.addWidget(self.btn)
-        layout3.addWidget(self.btn2)
-        layout2.addWidget(self.freq3)
-        layout2.addWidget(self.dial)
-        layout2.addWidget(self.freq)
-        layout2.addWidget(self.temp_out11)
+        # layout.addLayout(layout3)
+        # zrame.setLayout(layout4)
+        # layout.addWidget(zrame)
+        # layout.addLayout(layout7)
+        # layout10.addLayout(layout5)
+        # layout10.addLayout(layout6)
+        # layout11.addLayout(layout8)
+        # layout11.addLayout(layout9)
+        # xrame.setLayout(layout10)
+        # yrame.setLayout(layout11)
+        # layout4.addWidget(xrame)
+        # layout4.addWidget(yrame)
+        # layout3.addLayout(layout2)
+        # layout3.addWidget(self.btn)
+        # layout3.addWidget(self.btn2)
+        # layout2.addWidget(self.freq3)
+        # layout2.addWidget(self.dial)
+        # layout2.addWidget(self.freq)
+        # layout5.addWidget(self.temp_out1000)
+        # layout5.addWidget(self.temp_out2000)
+        # layout5.addWidget(self.temp_out3000)
+        # layout5.addWidget(self.temp_out4000)
+        # layout6.addWidget(self.temp_out0100)
+        # layout6.addWidget(self.temp_out0200)
+        # layout6.addWidget(self.temp_out0300)
+        # layout6.addWidget(self.temp_out0400)
+        # layout8.addWidget(self.temp_out0010)
+        # layout8.addWidget(self.temp_out0020)
+        # layout8.addWidget(self.temp_out0030)
+        # layout8.addWidget(self.temp_out0040)
+        # layout9.addWidget(self.temp_out0001)
+        # layout9.addWidget(self.temp_out0002)
+        # layout9.addWidget(self.temp_out0003)
+        # layout9.addWidget(self.temp_out0004)
+        # layout7.addWidget(self.output_text)
 
-        # layout4.addwidget(output_text1)
-        # layout4.addwidget(output_text2)
-        # layout4.addwidget(output_text3)
-        # layout4.addwidget(output_text4)
-        layout7.addWidget(self.output_text)
+        layout.addLayout(layout3)
+        zrame.setLayout(layout4)
+        layout.addWidget(zrame)
+        layout.addLayout(layout7)
+        layout3.addWidget(self.freq3)
+        layout3.addWidget(self.dial)
+        layout3.addWidget(self.freq)
+        xrame.setLayout(layout10)
+        yrame.setLayout(layout11)
+        layout4.addWidget(xrame)
+        layout4.addWidget(yrame)
+        layout10.addLayout(layout5)
+        layout10.addLayout(layout6)
+        layout11.addLayout(layout8)
+        layout11.addLayout(layout9)
+        layout5.addWidget(self.temp_out1000)
+        layout5.addWidget(self.temp_out2000)
+        layout5.addWidget(self.temp_out3000)
+        layout5.addWidget(self.temp_out4000)
+        layout6.addWidget(self.temp_out0400)
+        layout6.addWidget(self.temp_out0300)
+        layout6.addWidget(self.temp_out0200)
+        layout6.addWidget(self.temp_out0100)
+        layout8.addWidget(self.temp_out0010)
+        layout8.addWidget(self.temp_out0020)
+        layout8.addWidget(self.temp_out0030)
+        layout8.addWidget(self.temp_out0040)
+        layout9.addWidget(self.temp_out0004)
+        layout9.addWidget(self.temp_out0003)
+        layout9.addWidget(self.temp_out0002)
+        layout9.addWidget(self.temp_out0001)
+        layout7.addWidget(self.btn)
+        layout7.addWidget(self.btn2)
+
 
 
         with open('config.yml', 'r') as f:
@@ -424,6 +530,7 @@ class MainWindow(QMainWindow):
     def handle_stdout(self):
         data = self.p.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
+        print(stdout)
         self.output_text.append(stdout)
 
     def handle_stdout2(self):
@@ -434,20 +541,41 @@ class MainWindow(QMainWindow):
     def handle_stderr(self):
         data = self.p.readAllStandardError()
         stderr = bytes(data).decode("utf8")
+        print(stderr)
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
             if 'INFO' not in a:
                 print(a)
                 for i in range(len(a)):
-                    if a[i] == 'N':
-                        res = [float(i) for i in a[:i-2].split(', ')]
-                        type(res[0])
-                        self.tempset = res[0]
-                        print(res)
+                    if a[i] == 'h':
+                        b = a[i+13:i+43]
+                        print(b)
+                        res1 = [float(i) for i in b.split(', ')]
+                        c = a[i+60:i+90]
+                        res2 = [float(i) for i in c.split(', ')]
+                        #res = [float(i) for i in a[:i-2].split(', ')]
+                        #type(res[0])
+                        self.tempset = res1[0]
+                        print(res1[0])
+                        print("THE THING ABOVE IS WHAT U NEED RAHHH")
                         break
-                self.temp_out11.setText(str(res[0]) + " °C")
-                self.temp_out12.setText(str(res[1]) + " °C")
+                self.temp_out1000.setText(str(res1[0]) + " °C")
+                self.temp_out2000.setText(str(res1[1]) + " °C")
+                self.temp_out3000.setText(str(res1[2]) + " °C")
+                self.temp_out4000.setText(str(res1[3]) + " °C")
+                self.temp_out0100.setText(str(res1[4]) + " °C")
+                self.temp_out0200.setText(str(res1[5]) + " °C")
+                self.temp_out0300.setText(str(res1[6]) + " °C")
+                self.temp_out0400.setText(str(res1[7]) + " °C")
+                self.temp_out0010.setText(str(res2[0]) + " °C")
+                self.temp_out0020.setText(str(res2[1]) + " °C")
+                self.temp_out0030.setText(str(res2[2]) + " °C")
+                self.temp_out0040.setText(str(res2[3]) + " °C")
+                self.temp_out0001.setText(str(res2[4]) + " °C")
+                self.temp_out0002.setText(str(res2[5]) + " °C")
+                self.temp_out0003.setText(str(res2[6]) + " °C")
+                self.temp_out0004.setText(str(res2[7]) + " °C")
         if self.hash != None and self.tempset != None and self.flag == True:
             print("ITS HEREEEE")
             self.cur.execute("INSERT INTO grafana (temp, hash) VALUES (%s, %s);", (self.tempset, self.hash,))
@@ -455,8 +583,8 @@ class MainWindow(QMainWindow):
             self.cur.execute("SELECT hash, temp FROM grafana")
             self.conn.commit()
             sus = self.cur.fetchall()
-            print(sus)
-            self.hash = None
+            # print(sus)
+            # self.hash = None
             self.tempset = None
         self.output_text.append(f"Error: {stderr}")
 
