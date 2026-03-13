@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
         # except Error as e:
         #     print(f"Error connecting to PostgreSQL: {e}")
         #     return False
-        self.hash = 3.6
+        self.hash = None
         self.tempset = None
         self.hash2 = None
         self.tempset2 = None
@@ -597,7 +597,9 @@ class MainWindow(QMainWindow):
         if "hash rate" in stderr:
             b = stderr
             z = b.split("\n")
-            print("WELL THIS HAS TO BE OK RIGHT??? -->" + z[0])
+            for i in z:
+                if "hash rate" in i:
+                    self.hash = i[50:].split(" ")[0]  # in GH/s
         if "temperature and voltage" in stderr:
             res = []
             a = stderr[68:]
@@ -647,6 +649,20 @@ class MainWindow(QMainWindow):
                     self.tempset[6],
                     self.tempset[7],
                     self.hash,
+                ),
+            )
+            self.conn.commit()
+            self.cur.execute(
+                "INSERT INTO grafana2 (temp9, temp10, temp11, temp12, temp13, temp14, temp15, temp16) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
+                (
+                    self.tempset[0],
+                    self.tempset[1],
+                    self.tempset[2],
+                    self.tempset[3],
+                    self.tempset[4],
+                    self.tempset[5],
+                    self.tempset[6],
+                    self.tempset[7],
                 ),
             )
             self.conn.commit()
