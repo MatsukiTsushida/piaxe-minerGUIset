@@ -1,11 +1,11 @@
-# THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT) 
+# THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT)(16 chip set up with 2 integrated boards)
 
 
 
 ## Linux
 1. Pull the repository
 2. Open it in any code editor (I use Zed)
-3. Run GUI.py
+3. Run GUInew.py
 
 ### Or run
 
@@ -54,7 +54,7 @@ sudo -u postgres psql -c "CREATE DATABASE postgres;"
 sudo -u postgres psql postgres < "./backup.sql"
 sudo systemctl restart postgresql
 
-python3 GUI.py
+python3 GUInew.py
 
 ```
 
@@ -93,7 +93,7 @@ cp config.yml.example config.yml
 cp start_mainnet_publicpool_example.sh start.sh
 
 ```
-11. The repository should now be installed and the GUI and you can start the GUI with ``` python3 GUI.py ```
+11. The repository should now be installed and the GUI and you can start the GUI with ``` python3 GUInew.py ```
 
 
 
