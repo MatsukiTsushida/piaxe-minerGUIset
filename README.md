@@ -19,7 +19,7 @@ sudo apt install git
 sudo apt install python3-pip
 
 # clone repository
-sudo git clone https://github.com/MatsukiTsushida/QAxeMinerGUIset.git
+sudo git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
 cd piaxe-minerGUIset
 
 # and install requirements
@@ -63,7 +63,7 @@ sudo apt install git
 sudo apt install python3-pip
 
 # clone repository
-sudo git clone https://github.com/MatsukiTsushida/QAxeMinerGUIset.git
+sudo git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
 cd piaxe-minerGUIset
 
 # and install requirements
