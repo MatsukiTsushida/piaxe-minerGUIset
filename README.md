@@ -31,7 +31,7 @@ cp start_mainnet_publicpool_example.sh start.sh
 
 cd piaxe-minerGUIset
 #for 4 chips to collect (legacy version with 2 distinct hasboards)
-#sudo python3 GUInew.py
+sudo python3 GUInew.py
 
 
 
