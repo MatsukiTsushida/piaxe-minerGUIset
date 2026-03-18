@@ -599,9 +599,11 @@ class MainWindow(QMainWindow):
             z = b.split("\n")
             for i in z:
                 if "hash rate" in i:
+                    print("GSCHIEẞENE HASH RATE RAAAHHH -->" + i)
                     self.hash = i[50:].split(" ")[0]  # in GH/s
         if "temperature and voltage" in stderr:
-            res = []
+            res1 = []
+            res2 = []
             a = stderr[68:]
             if "INFO" not in a:
                 print(a)
@@ -655,14 +657,14 @@ class MainWindow(QMainWindow):
             self.cur.execute(
                 "INSERT INTO grafana2 (temp9, temp10, temp11, temp12, temp13, temp14, temp15, temp16) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
                 (
-                    self.tempset[0],
-                    self.tempset[1],
-                    self.tempset[2],
-                    self.tempset[3],
-                    self.tempset[4],
-                    self.tempset[5],
-                    self.tempset[6],
-                    self.tempset[7],
+                    self.tempset2[0],
+                    self.tempset2[1],
+                    self.tempset2[2],
+                    self.tempset2[3],
+                    self.tempset2[4],
+                    self.tempset2[5],
+                    self.tempset2[6],
+                    self.tempset2[7],
                 ),
             )
             self.conn.commit()
