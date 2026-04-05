@@ -1,10 +1,11 @@
 import os
 import signal
 import sys
+import time
 from datetime import datetime
 
 import psycopg2
-from PyQt5.QtCore import QProcess, QSize, Qt, QThread
+from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QApplication,
@@ -91,6 +92,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.p = None
         self.k = None
+        self.flagod = False
         self.setWindowTitle("ClockEngage QAxe")
         self.setWindowIcon(QIcon("axe.jpg"))
         self.resize(QSize(800, 800))
@@ -157,6 +159,7 @@ class MainWindow(QMainWindow):
         layout9 = QHBoxLayout()
         layout10 = QVBoxLayout()
         layout11 = QVBoxLayout()
+        layout12 = QHBoxLayout()
 
         zrame = QFrame()
         zrame.resize(1, 1)
@@ -300,6 +303,13 @@ class MainWindow(QMainWindow):
         rightTopFrame.resize(1, 1)
         rightTopFrame.setStyleSheet("background-color: yellow")
 
+        self.freq = QLabel("", self)
+        self.freq.setAlignment(Qt.AlignCenter)
+        self.freq.setMaximumHeight(50)
+        # self.freq2 = QLabel('', self)
+        # self.freq2.setAlignment(Qt.AlignCenter)
+        # self.freq2.setMaximumHeight(50)
+
         self.dial = QDial()
         # self.dial.move(175, 175)
         # self.dial.setGeometry(50, 50, 50, 50)
@@ -310,6 +320,9 @@ class MainWindow(QMainWindow):
         self.dial.valueChanged.connect(self.value1)
         self.dial.sliderReleased.connect(self.change1)
         self.dial.setNotchesVisible(True)
+        self.dial.setEnabled(False)
+        self.dial.setValue(250)
+        self.change1()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
         self.dial2.setMinimum(200)
@@ -319,19 +332,18 @@ class MainWindow(QMainWindow):
         self.dial2.sliderReleased.connect(self.change2)
         self.dial2.setNotchesVisible(True)
 
-        self.freq = QLabel("", self)
-        self.freq.setAlignment(Qt.AlignCenter)
-        self.freq.setMaximumHeight(50)
-        # self.freq2 = QLabel('', self)
-        # self.freq2.setAlignment(Qt.AlignCenter)
-        # self.freq2.setMaximumHeight(50)
-
         self.freq3 = QLabel("Clock speed dial:", self)
         self.freq3.setAlignment(Qt.AlignCenter)
         self.freq3.setMaximumHeight(50)
         # self.freq4 = QLabel('ClockSpeed worker3', self)
         # self.freq4.setAlignment(Qt.AlignCenter)
         # self.freq4.setMaximumHeight(50)
+        #
+        self.godmode = QPushButton("¡Godmode!")
+        self.godmode.setStyleSheet("background-color : red")
+        self.godmode.setFixedSize(QSize(200, 100))
+        self.godmode.pressed.connect(self.god)
+        self.godmode.setEnabled(False)
 
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
@@ -372,6 +384,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(layout3)
         zrame.setLayout(layout4)
         layout.addWidget(zrame)
+        layout.addLayout(layout12)
         layout.addLayout(layout7)
         layout3.addWidget(self.freq3)
         layout3.addWidget(self.dial)
@@ -400,6 +413,8 @@ class MainWindow(QMainWindow):
         layout9.addWidget(self.temp_out15)
         layout9.addWidget(self.temp_out14)
         layout9.addWidget(self.temp_out13)
+        layout12.addWidget(self.output_text)
+        layout12.addWidget(self.godmode)
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
 
@@ -435,6 +450,14 @@ class MainWindow(QMainWindow):
     def pressed_ok(self):
         self.flag = True
         print(self.flag)
+
+    def god(self):
+        if self.flagod == True:
+            self.dial.setEnabled(False)
+            self.flagod = False
+        else:
+            self.dial.setEnabled(True)
+            self.flagod = True
 
     def pressed_cancel(self):
         self.flag = False
@@ -493,8 +516,12 @@ class MainWindow(QMainWindow):
             self.start_process2()
         self.output_text2.append("Calibration complete.")
 
+    def timer(self):
+        self.godmode.setEnabled(True)
+
     def start_process1(self):
         if self.p is None:
+            QTimer.singleShot(120000, self.timer)
             print("Executing process 2...")
             self.output_text.append("Starting mining process 2...")
 
@@ -614,6 +641,18 @@ class MainWindow(QMainWindow):
                         res1 = [float(i) for i in b.split(", ")]
                         c = a[i + 60 : i + 90]
                         res2 = [float(i) for i in c.split(", ")]
+                        if 68 in res1 or 68 in res2:
+                            for i in range(5):
+                                self.output_text.setStyleSheet(
+                                    "selection-background-color: red;"
+                                )
+                                self.output_text.append(
+                                    "WARNING! REACHING CRITICAL TEMPERATURE!!!"
+                                )
+                        else:
+                            self.output_text.setStyleSheet(
+                                "selection-background-color: white;"
+                            )
                         # res = [float(i) for i in a[:i-2].split(', ')]
                         # type(res[0])
                         self.tempset = res1
@@ -707,6 +746,9 @@ class MainWindow(QMainWindow):
 
     def stop_process1(self):
         if self.p:
+            self.output_text.clear()
+            self.output_text.setStyleSheet("selection-background-color: white;")
+            self.godmode.setEnabled(False)
             # os.kill(self.pid1, signal.SIGINT)
             self.p.terminate()
             # self.p.kill()

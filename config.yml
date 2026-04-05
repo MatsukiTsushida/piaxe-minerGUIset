@@ -13,7 +13,7 @@ clioptions:
 piaxe:
   name: PiAxe
   chips: 1
-  asic_frequency: 485
+  asic_frequency: 250
   sdn_pin: 11
   pgood_pin: 13
   nrst_pin: 15
@@ -36,7 +36,7 @@ qaxe:
   chips: 16
   fan_speed_1: 1.0
   fan_speed_2: 1.0
-  asic_frequency: 450
+  asic_frequency: 250
   extranonce2_interval: 1.9
   serial_port_asic: /dev/ttyACM1
   serial_port_ctrl: /dev/ttyACM0
