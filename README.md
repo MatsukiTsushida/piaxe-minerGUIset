@@ -4,7 +4,7 @@
 ## Before Anything else...
 ### How to update 
 1. Go into the folder in terminal
-2. Type in ```git pull origin/master```
+2. Type in ```git reset --hard origin/master```
 
 ## Linux
 1. Pull the repository
