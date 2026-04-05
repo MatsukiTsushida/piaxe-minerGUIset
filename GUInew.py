@@ -1,4 +1,5 @@
 import os
+import random
 import signal
 import sys
 import time
@@ -568,6 +569,9 @@ class MainWindow(QMainWindow):
         else:
             print("Process already 2 running")
 
+    def colour(self):
+        self.btn2.setStyleSheet("background-color: orange;")
+
     def start_process2(self):
         if self.k is None:
             print("Executing process 3...")
@@ -641,18 +645,18 @@ class MainWindow(QMainWindow):
                         res1 = [float(i) for i in b.split(", ")]
                         c = a[i + 60 : i + 90]
                         res2 = [float(i) for i in c.split(", ")]
-                        if 68 in res1 or 68 in res2:
-                            for i in range(5):
-                                self.output_text.setStyleSheet(
-                                    "selection-background-color: red;"
-                                )
-                                self.output_text.append(
-                                    "WARNING! REACHING CRITICAL TEMPERATURE!!!"
-                                )
-                        else:
-                            self.output_text.setStyleSheet(
-                                "selection-background-color: white;"
-                            )
+                        for i in range(len(res1)):
+                            if res1[i] >= 65 or res2[i] >= 65:
+                                self.setStyleSheet("background-color: red;")
+                                for j in range(5):
+                                    self.btn2.setStyleSheet("background-color: blue;")
+                                    self.output_text.append(
+                                        "WARNING! REACHING CRITICAL TEMPERATURE!!!"
+                                    )
+                                    QTimer.singleShot(100 * (j + 1), self.colour)
+
+                            # else:
+                            #     self.setStyleSheet("selection-background-color: white;")
                         # res = [float(i) for i in a[:i-2].split(', ')]
                         # type(res[0])
                         self.tempset = res1
@@ -745,10 +749,13 @@ class MainWindow(QMainWindow):
         self.output_text2.append(f"Error: {stderr}")
 
     def stop_process1(self):
+        self.btn2.setStyleSheet("background-color: white;")
+        self.setStyleSheet("background-color: white;")
         if self.p:
             self.output_text.clear()
-            self.output_text.setStyleSheet("selection-background-color: white;")
             self.godmode.setEnabled(False)
+            self.btn2.setStyleSheet("background-color: white;")
+            self.setStyleSheet("background-color: white;")
             # os.kill(self.pid1, signal.SIGINT)
             self.p.terminate()
             # self.p.kill()
