@@ -1,5 +1,10 @@
-# THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT)(16 chip set up with 2 integrated boards)
+# THIS IS THE GUI VERSION OF THE PIAXE MINER BASED ON PyQt5 (WINDOWS SUPPORT)
+### (16 chip set up with 2 integrated boards, check out my QAxeMiner repo for 4 chips)
 
+## Before Anything else...
+### How to update 
+1. Go into the folder in terminal
+2. Type in ```git reset --hard origin/master```
 
 ## Linux
 1. Pull the repository
