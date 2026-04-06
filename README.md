@@ -2,13 +2,18 @@
 ### (16 chip set up with 2 integrated boards, check out my QAxeMiner repo for 4 chips)
 
 ## Before Anything else...
-### How to update 
+### How to update (If you didnt change the local repo)
 1. Go into the folder in terminal
 2. Type in:
     ```
    git fetch --all 
    git reset --hard origin/master
     ```
+If you did change it somehow then in order to not delete your changes type:
+```
+git fetch --all
+git pull origin master
+```
 
 ## Linux
 1. Pull the repository
