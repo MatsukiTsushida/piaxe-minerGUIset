@@ -6,8 +6,8 @@ import time
 from datetime import datetime
 
 import psycopg2
-from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer, center
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
     QApplication,
     QDial,
@@ -161,6 +161,8 @@ class MainWindow(QMainWindow):
         layout10 = QVBoxLayout()
         layout11 = QVBoxLayout()
         layout12 = QHBoxLayout()
+        layout13 = QVBoxLayout()
+        layout14 = QVBoxLayout()
 
         zrame = QFrame()
         zrame.resize(1, 1)
@@ -172,13 +174,13 @@ class MainWindow(QMainWindow):
         yrame.resize(1, 1)
         yrame.setFrameShadow(QFrame.Plain)
         yrame.setFrameShape(QFrame.Box)
-        yrame.setStyleSheet("border: 1px solid blue;")
+        yrame.setStyleSheet("border: 2px solid blue;")
 
         xrame = QFrame()
         xrame.resize(1, 1)
         xrame.setFrameShadow(QFrame.Plain)
         xrame.setFrameShape(QFrame.Box)
-        xrame.setStyleSheet("border: 1px solid green;")
+        xrame.setStyleSheet("border: 2px solid #77DD77;")
 
         self.pid1 = 0
         self.pid2 = 0
@@ -220,82 +222,82 @@ class MainWindow(QMainWindow):
         self.output_text2.setMaximumHeight(200)
         self.output_text2.setMaximumWidth(200)
 
-        self.temp_out1 = QLabel("0°C")
+        self.temp_out1 = QLabel("tmp1")
         self.temp_out1.setAlignment(Qt.AlignCenter)
         self.temp_out1.setMaximumHeight(15)
         self.temp_out1.setMaximumWidth(50)
 
-        self.temp_out2 = QLabel("0°C")
+        self.temp_out2 = QLabel("tmp2")
         self.temp_out2.setAlignment(Qt.AlignCenter)
         self.temp_out2.setMaximumHeight(15)
         self.temp_out2.setMaximumWidth(50)
 
-        self.temp_out3 = QLabel("0°C")
+        self.temp_out3 = QLabel("tmp3")
         self.temp_out3.setAlignment(Qt.AlignCenter)
         self.temp_out3.setMaximumHeight(15)
         self.temp_out3.setMaximumWidth(50)
 
-        self.temp_out4 = QLabel("0°C")
+        self.temp_out4 = QLabel("tmp4")
         self.temp_out4.setAlignment(Qt.AlignCenter)
         self.temp_out4.setMaximumHeight(15)
         self.temp_out4.setMaximumWidth(50)
 
-        self.temp_out5 = QLabel("0°C")
+        self.temp_out5 = QLabel("tmp5")
         self.temp_out5.setAlignment(Qt.AlignCenter)
         self.temp_out5.setMaximumHeight(15)
         self.temp_out5.setMaximumWidth(50)
 
-        self.temp_out6 = QLabel("0°C")
+        self.temp_out6 = QLabel("tmp6")
         self.temp_out6.setAlignment(Qt.AlignCenter)
         self.temp_out6.setMaximumHeight(15)
         self.temp_out6.setMaximumWidth(50)
 
-        self.temp_out7 = QLabel("0°C")
+        self.temp_out7 = QLabel("tmp7")
         self.temp_out7.setAlignment(Qt.AlignCenter)
         self.temp_out7.setMaximumHeight(15)
         self.temp_out7.setMaximumWidth(50)
 
-        self.temp_out8 = QLabel("0°C")
+        self.temp_out8 = QLabel("tmp8")
         self.temp_out8.setAlignment(Qt.AlignCenter)
         self.temp_out8.setMaximumHeight(15)
         self.temp_out8.setMaximumWidth(50)
 
-        self.temp_out9 = QLabel("0°C")
+        self.temp_out9 = QLabel("tmp9")
         self.temp_out9.setAlignment(Qt.AlignCenter)
         self.temp_out9.setMaximumHeight(15)
         self.temp_out9.setMaximumWidth(50)
 
-        self.temp_out10 = QLabel("0°C")
+        self.temp_out10 = QLabel("tmp10")
         self.temp_out10.setAlignment(Qt.AlignCenter)
         self.temp_out10.setMaximumHeight(15)
         self.temp_out10.setMaximumWidth(50)
 
-        self.temp_out11 = QLabel("0°C")
+        self.temp_out11 = QLabel("tmp11")
         self.temp_out11.setAlignment(Qt.AlignCenter)
         self.temp_out11.setMaximumHeight(15)
         self.temp_out11.setMaximumWidth(50)
 
-        self.temp_out12 = QLabel("0°C")
+        self.temp_out12 = QLabel("tmp12")
         self.temp_out12.setAlignment(Qt.AlignCenter)
         self.temp_out12.setMaximumHeight(15)
         self.temp_out12.setMaximumWidth(50)
 
-        self.temp_out13 = QLabel("0°C")
+        self.temp_out13 = QLabel("tmp13")
         self.temp_out13.setAlignment(Qt.AlignCenter)
         self.temp_out13.setMaximumHeight(15)
         self.temp_out13.setMaximumWidth(50)
 
-        self.temp_out14 = QLabel("0°C")
+        self.temp_out14 = QLabel("tmp14")
         self.temp_out14.setAlignment(Qt.AlignCenter)
         self.temp_out14.setMaximumHeight(15)
         self.temp_out14.setMaximumWidth(50)
 
-        self.temp_out15 = QLabel("0°C")
+        self.temp_out15 = QLabel("tmp15")
         self.temp_out15.setAlignment(Qt.AlignCenter)
         self.temp_out15.setMaximumHeight(15)
         self.temp_out15.setMaximumWidth(50)
 
-        self.temp_out16 = QLabel("0°C")
+        self.temp_out16 = QLabel("tmp16")
         self.temp_out16.setAlignment(Qt.AlignCenter)
         self.temp_out16.setMaximumHeight(15)
         self.temp_out16.setMaximumWidth(50)
@@ -346,6 +348,13 @@ class MainWindow(QMainWindow):
         self.godmode.pressed.connect(self.god)
         self.godmode.setEnabled(False)
 
+        self.label1 = QLabel("Hash Board 1")
+        self.label1.setMaximumHeight(20)
+        self.label1.setAlignment(Qt.AlignCenter)
+        self.label2 = QLabel("Hash Board 2")
+        self.label2.setAlignment(Qt.AlignCenter)
+        self.label2.setMaximumHeight(20)
+
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
         # layout.addWidget(zrame)
@@ -392,8 +401,12 @@ class MainWindow(QMainWindow):
         layout3.addWidget(self.freq)
         xrame.setLayout(layout10)
         yrame.setLayout(layout11)
-        layout4.addWidget(xrame)
-        layout4.addWidget(yrame)
+        layout4.addLayout(layout13)
+        layout4.addLayout(layout14)
+        layout13.addWidget(self.label1)
+        layout14.addWidget(self.label2)
+        layout13.addWidget(xrame)
+        layout14.addWidget(yrame)
         layout10.addLayout(layout5)
         layout10.addLayout(layout6)
         layout11.addLayout(layout8)
