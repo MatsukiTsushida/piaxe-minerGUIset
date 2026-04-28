@@ -1,6 +1,8 @@
+import json
 import os
 import random
 import signal
+import socket
 import sys
 import time
 from datetime import datetime
@@ -28,6 +30,7 @@ from PyQt5.QtWidgets import (
 )
 from ruamel.yaml import YAML
 
+import bridge
 from usb_detect import DeviceInterfaces, find_devices
 
 # Database connection parameters
@@ -92,6 +95,8 @@ class MainWindow(QMainWindow):
     def __init__(self, flag=False):
         super().__init__()
         self.p = None
+        self.vol = True
+        self.check = True
         self.k = None
         self.flagod = False
         self.setWindowTitle("ClockEngage QAxe")
@@ -138,6 +143,17 @@ class MainWindow(QMainWindow):
         self.tempset = None
         self.hash2 = None
         self.tempset2 = None
+
+        # Server to fetch Data
+        self.server1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server1.bind(("127.0.0.1", 5555))
+        self.server1.listen(1)
+        self.server1.setblocking(False)
+
+        self.server2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server2.bind(("127.0.0.1", 5556))
+        self.server2.listen(1)
+        self.server2.setblocking(False)
 
         self.buttonBox = QMessageBox()
         self.buttonBox.setText("Do you want to add a DataBase for Grafana?")
@@ -324,7 +340,7 @@ class MainWindow(QMainWindow):
         self.dial.sliderReleased.connect(self.change1)
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
-        self.dial.setValue(250)
+        self.dial.setValue(550)
         self.change1()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
@@ -444,6 +460,93 @@ class MainWindow(QMainWindow):
         #     print(data["qaxe"]["asic_frequency"])
         #     self.freq2.setText(str(data["qaxe"]["asic_frequency"]) + 'Mhz')
         #     self.dial2.setValue(data["qaxe"]["asic_frequency"])
+
+    def check_for_incoming_data(self):
+        try:
+            conn, addr = self.server1.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    # UPDATE YOUR UI DIRECTLY HERE
+                    # self.temp_out1.setText(f"{clean_dict['hb1_temps'][0]} °C")
+                    print(f"{clean_dict['hb1_temps'][0]} °C")
+                    max_temp = 0
+
+                    for i in range(len(clean_dict["hb1_temps"])):
+                        if clean_dict["hb1_temps"][i] > max_temp:
+                            max_temp = clean_dict["hb1_temps"][i]
+                        if clean_dict["hb2_temps"][i] > max_temp:
+                            max_temp = clean_dict["hb2_temps"][i]
+                    if max_temp >= 58 and max_temp <= 64:
+                        self.setStyleSheet("background-color: yellow;")
+                        self.output_text.append("GETTING TOASTY...")
+                    if max_temp >= 65:
+                        self.check = False
+                        self.setStyleSheet("background-color: red;")
+                        for j in range(5):
+                            self.btn2.setStyleSheet("background-color: blue;")
+                            self.output_text.append(
+                                "WARNING! REACHING CRITICAL TEMPERATURE!!!"
+                            )
+                            QTimer.singleShot(250 * (j + 1), self.colour)
+
+                    print("Direct data received!")
+                    self.temp_out1.setText(str(clean_dict["hb1_temps"][0]) + " °C")
+                    print(str(clean_dict))
+                    self.temp_out2.setText(str(clean_dict["hb1_temps"][1]) + " °C")
+                    self.temp_out3.setText(str(clean_dict["hb1_temps"][2]) + " °C")
+                    self.temp_out4.setText(str(clean_dict["hb1_temps"][3]) + " °C")
+                    self.temp_out5.setText(str(clean_dict["hb1_temps"][4]) + " °C")
+                    self.temp_out6.setText(str(clean_dict["hb1_temps"][5]) + " °C")
+                    self.temp_out7.setText(str(clean_dict["hb1_temps"][6]) + " °C")
+                    self.temp_out8.setText(str(clean_dict["hb1_temps"][7]) + " °C")
+                    self.temp_out9.setText(str(clean_dict["hb2_temps"][0]) + " °C")
+                    self.temp_out10.setText(str(clean_dict["hb2_temps"][1]) + " °C")
+                    self.temp_out11.setText(str(clean_dict["hb2_temps"][2]) + " °C")
+                    self.temp_out12.setText(str(clean_dict["hb2_temps"][3]) + " °C")
+                    self.temp_out13.setText(str(clean_dict["hb2_temps"][4]) + " °C")
+                    self.temp_out14.setText(str(clean_dict["hb2_temps"][5]) + " °C")
+                    self.temp_out15.setText(str(clean_dict["hb2_temps"][6]) + " °C")
+                    self.temp_out16.setText(str(clean_dict["hb2_temps"][7]) + " °C")
+                    if self.flag:
+                        self.cur.execute(
+                            "INSERT INTO grafana (temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
+                            (
+                                clean_dict["hb1_temps"][0],
+                                clean_dict["hb1_temps"][1],
+                                clean_dict["hb1_temps"][2],
+                                clean_dict["hb1_temps"][3],
+                                clean_dict["hb1_temps"][4],
+                                clean_dict["hb1_temps"][5],
+                                clean_dict["hb1_temps"][6],
+                                clean_dict["hb1_temps"][7],
+                            ),
+                        )
+        except BlockingIOError:
+            pass  # No new mail yet
+
+    def check_for_incoming_hash(self):
+        try:
+            conn, addr = self.server2.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    # UPDATE YOUR UI DIRECTLY HERE
+                    # self.temp_out1.setText(f"{clean_dict['hb1_temps'][0]} °C")
+                    if not self.vol:
+                        self.output_text.append(
+                            f"Miner running with hash rate...\n{clean_dict['hash'][1:]} GH"
+                        )
+                    print("Direct HASH DATA received!")
+                    if self.flag:
+                        self.cur.execute(
+                            "INSERT INTO grafana (hash) VALUES (%s);",
+                            (str(clean_dict["hash"][1:]),),
+                        )
+        except BlockingIOError:
+            pass  # No new mail yet
 
     def connect_post(self):
         if self.flag:
@@ -568,6 +671,15 @@ class MainWindow(QMainWindow):
                 self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
                 self.dial.setValue(data["qaxe"]["asic_frequency"])
 
+            # checking for temperature data
+            self.mail_timer = QTimer()
+            self.mail_timer.timeout.connect(self.check_for_incoming_data)
+            self.mail_timer.start(1000)  # Check every second
+
+            self.mail_timer2 = QTimer()
+            self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
+            self.mail_timer2.start(1000)
+
             # Update button text
             self.btn.setText("Mining2...")
             self.btn.setEnabled(False)
@@ -627,7 +739,7 @@ class MainWindow(QMainWindow):
         data = self.p.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
         print(stdout)
-        self.output_text.append(stdout)
+        # self.output_text.append(stdout)
 
     def handle_stdout2(self):
         data = self.k.readAllStandardOutput()
@@ -645,92 +757,96 @@ class MainWindow(QMainWindow):
                 if "hash rate" in i:
                     print("GSCHIEẞENE HASH RATE RAAAHHH -->" + i)
                     self.hash = i[50:].split(" ")[0]  # in GH/s
-        if "temperature and voltage" in stderr:
-            res1 = []
-            res2 = []
-            a = stderr[68:]
-            if "INFO" not in a:
-                print(a)
-                for i in range(len(a)):
-                    if a[i] == "h":
-                        b = a[i + 13 : i + 43]
-                        print(b)
-                        res1 = [float(i) for i in b.split(", ")]
-                        c = a[i + 60 : i + 90]
-                        res2 = [float(i) for i in c.split(", ")]
-                        for i in range(len(res1)):
-                            if res1[i] >= 65 or res2[i] >= 65:
-                                self.setStyleSheet("background-color: red;")
-                                for j in range(5):
-                                    self.btn2.setStyleSheet("background-color: blue;")
-                                    self.output_text.append(
-                                        "WARNING! REACHING CRITICAL TEMPERATURE!!!"
-                                    )
-                                    QTimer.singleShot(100 * (j + 1), self.colour)
+        # if "temperature and voltage" in stderr:
+        #     res1 = []
+        #     res2 = []
+        #     a = stderr[68:]
+        #     if "INFO" not in a:
+        #         print(a)
+        #         for i in range(len(a)):
+        #             if a[i] == "h":
+        #                 b = a[i + 13 : i + 43]
+        #                 print(b)
+        #                 res1 = [float(i) for i in b.split(", ")]
+        #                 c = a[i + 60 : i + 90]
+        #                 res2 = [float(i) for i in c.split(", ")]
+        #                 for i in range(len(res1)):
+        #                     if res1[i] >= 65 or res2[i] >= 65:
+        #                         self.setStyleSheet("background-color: red;")
+        #                         for j in range(5):
+        #                             self.btn2.setStyleSheet("background-color: blue;")
+        #                             self.output_text.append(
+        #                                 "WARNING! REACHING CRITICAL TEMPERATURE!!!"
+        #                             )
+        #                             QTimer.singleShot(250 * (j + 1), self.colour)
 
-                            # else:
-                            #     self.setStyleSheet("selection-background-color: white;")
-                        # res = [float(i) for i in a[:i-2].split(', ')]
-                        # type(res[0])
-                        self.tempset = res1
-                        self.tempset2 = res2
-                        print(res1[0])
-                        print("THE THING ABOVE IS WHAT U NEED RAHHH")
-                        break
-                self.temp_out1.setText(str(res1[0]) + " °C")
-                self.temp_out2.setText(str(res1[1]) + " °C")
-                self.temp_out3.setText(str(res1[2]) + " °C")
-                self.temp_out4.setText(str(res1[3]) + " °C")
-                self.temp_out5.setText(str(res1[4]) + " °C")
-                self.temp_out6.setText(str(res1[5]) + " °C")
-                self.temp_out7.setText(str(res1[6]) + " °C")
-                self.temp_out8.setText(str(res1[7]) + " °C")
-                self.temp_out9.setText(str(res2[0]) + " °C")
-                self.temp_out10.setText(str(res2[1]) + " °C")
-                self.temp_out11.setText(str(res2[2]) + " °C")
-                self.temp_out12.setText(str(res2[3]) + " °C")
-                self.temp_out13.setText(str(res2[4]) + " °C")
-                self.temp_out14.setText(str(res2[5]) + " °C")
-                self.temp_out15.setText(str(res2[6]) + " °C")
-                self.temp_out16.setText(str(res2[7]) + " °C")
-        if self.hash != None and self.tempset != None and self.flag:
-            print("ITS HEREEEE")
-            self.cur.execute(
-                "INSERT INTO grafana (temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, hash) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                (
-                    self.tempset[0],
-                    self.tempset[1],
-                    self.tempset[2],
-                    self.tempset[3],
-                    self.tempset[4],
-                    self.tempset[5],
-                    self.tempset[6],
-                    self.tempset[7],
-                    self.hash,
-                ),
-            )
-            self.conn.commit()
-            self.cur.execute(
-                "INSERT INTO grafana2 (temp9, temp10, temp11, temp12, temp13, temp14, temp15, temp16) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
-                (
-                    self.tempset2[0],
-                    self.tempset2[1],
-                    self.tempset2[2],
-                    self.tempset2[3],
-                    self.tempset2[4],
-                    self.tempset2[5],
-                    self.tempset2[6],
-                    self.tempset2[7],
-                ),
-            )
-            self.conn.commit()
-            self.cur.execute("SELECT hash, temp FROM grafana")
-            self.conn.commit()
-            sus = self.cur.fetchall()
-            # print(sus)
-            # self.hash = None
-            # self.tempset = None
-        self.output_text.append(f"Error: {stderr}")
+        # else:
+        #     self.setStyleSheet("selection-background-color: white;")
+        # res = [float(i) for i in a[:i-2].split(', ')]
+        # type(res[0])
+        # self.tempset = res1
+        # self.tempset2 = res2
+        # print(res1[0])
+        # print("THE THING ABOVE IS WHAT U NEED RAHHH")
+        # break
+        # self.temp_out1.setText(str(res1[0]) + " °C")
+        # self.temp_out2.setText(str(res1[1]) + " °C")
+        # self.temp_out3.setText(str(res1[2]) + " °C")
+        # self.temp_out4.setText(str(res1[3]) + " °C")
+        # self.temp_out5.setText(str(res1[4]) + " °C")
+        # self.temp_out6.setText(str(res1[5]) + " °C")
+        # self.temp_out7.setText(str(res1[6]) + " °C")
+        # self.temp_out8.setText(str(res1[7]) + " °C")
+        # self.temp_out9.setText(str(res2[0]) + " °C")
+        # self.temp_out10.setText(str(res2[1]) + " °C")
+        # self.temp_out11.setText(str(res2[2]) + " °C")
+        # self.temp_out12.setText(str(res2[3]) + " °C")
+        # self.temp_out13.setText(str(res2[4]) + " °C")
+        # self.temp_out14.setText(str(res2[5]) + " °C")
+        # self.temp_out15.setText(str(res2[6]) + " °C")
+        # self.temp_out16.setText(str(res2[7]) + " °C")
+        # if self.hash != None and self.tempset != None and self.flag:
+        #     # print("ITS HEREEEE")
+        #     self.cur.execute(
+        #         "INSERT INTO grafana (temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, hash) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);",
+        #         (
+        #             self.tempset[0],
+        #             self.tempset[1],
+        #             self.tempset[2],
+        #             self.tempset[3],
+        #             self.tempset[4],
+        #             self.tempset[5],
+        #             self.tempset[6],
+        #             self.tempset[7],
+        #             self.hash,
+        #         ),
+        #     )
+        #     self.conn.commit()
+        #     self.cur.execute(
+        #         "INSERT INTO grafana2 (temp9, temp10, temp11, temp12, temp13, temp14, temp15, temp16) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
+        #         (
+        #             self.tempset2[0],
+        #             self.tempset2[1],
+        #             self.tempset2[2],
+        #             self.tempset2[3],
+        #             self.tempset2[4],
+        #             self.tempset2[5],
+        #             self.tempset2[6],
+        #             self.tempset2[7],
+        #         ),
+        #     )
+        #     self.conn.commit()
+        #     self.cur.execute("SELECT hash, temp FROM grafana")
+        #     self.conn.commit()
+        #     sus = self.cur.fetchall()
+        #     # print(sus)
+        #     # self.hash = None
+        #     # self.tempset = None
+        #
+        if "16 chips were found!" in stderr:
+            self.vol = False
+        if self.vol:
+            self.output_text.append(f"Error: {stderr}")
 
     def handle_stderr2(self):
         data = self.k.readAllStandardError()
@@ -762,8 +878,10 @@ class MainWindow(QMainWindow):
         self.output_text2.append(f"Error: {stderr}")
 
     def stop_process1(self):
-        self.btn2.setStyleSheet("background-color: white;")
-        self.setStyleSheet("background-color: white;")
+        self.vol = True
+        self.check = True
+        self.btn2.setStyleSheet("background-color: grey;")
+        self.setStyleSheet("background-color: grey;")
         if self.p:
             self.output_text.clear()
             self.godmode.setEnabled(False)
