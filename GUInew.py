@@ -95,8 +95,10 @@ class MainWindow(QMainWindow):
     def __init__(self, flag=False):
         super().__init__()
         self.p = None
+        self.again = False
         self.vol = True
         self.check = True
+        self.timer_flag = False
         self.k = None
         self.flagod = False
         self.setWindowTitle("ClockEngage QAxe")
@@ -340,7 +342,7 @@ class MainWindow(QMainWindow):
         self.dial.sliderReleased.connect(self.change1)
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
-        self.dial.setValue(550)
+        self.dial.setValue(350)
         self.change1()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
@@ -359,7 +361,9 @@ class MainWindow(QMainWindow):
         # self.freq4.setMaximumHeight(50)
         #
         self.godmode = QPushButton("¡Godmode!")
-        self.godmode.setStyleSheet("background-color : red")
+        self.godmode.setStyleSheet(
+            "background-color : red; font-size: 30px; color: blue"
+        )
         self.godmode.setFixedSize(QSize(200, 100))
         self.godmode.pressed.connect(self.god)
         self.godmode.setEnabled(False)
@@ -371,6 +375,11 @@ class MainWindow(QMainWindow):
         self.label2.setAlignment(Qt.AlignCenter)
         self.label2.setMaximumHeight(20)
 
+        self.godmode_timer = QTimer(self)
+        self.godmode_timer.timeout.connect(self.timerupdate)
+        self.godmode_timer.start(100)
+
+        self.showTime = QLabel("//TIMER//")
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
         # layout.addWidget(zrame)
@@ -447,6 +456,7 @@ class MainWindow(QMainWindow):
         layout12.addWidget(self.godmode)
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
+        # layout7.addWidget(self.showTime)
 
         with open("config.yml", "r") as f:
             yaml = YAML()
@@ -636,9 +646,29 @@ class MainWindow(QMainWindow):
     def timer(self):
         self.godmode.setEnabled(True)
 
+    def timerupdate(self):
+        if self.timer_flag:
+            self.count -= 1
+            # timer is completed
+            if self.count == 0:
+                self.timer()
+                # making flag false
+                self.timer_flag = False
+                self.godmode.setText("¡Godmode!")
+                # setting text to the label
+                print("TIMER Completed !!!! ")
+
+        if self.timer_flag:
+            # getting text from count
+            text = str(self.count / 10) + " s"
+            self.godmode.setText(text)
+            print("REMAINING TIME ->", text)
+
     def start_process1(self):
         if self.p is None:
-            QTimer.singleShot(120000, self.timer)
+            self.count = 1200
+            self.timer_flag = True
+
             print("Executing process 2...")
             self.output_text.append("Starting mining process 2...")
 
@@ -880,6 +910,7 @@ class MainWindow(QMainWindow):
     def stop_process1(self):
         self.vol = True
         self.check = True
+        self.timer_flag = False
         self.btn2.setStyleSheet("background-color: grey;")
         self.setStyleSheet("background-color: grey;")
         if self.p:
