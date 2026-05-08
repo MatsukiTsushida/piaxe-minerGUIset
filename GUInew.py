@@ -342,9 +342,7 @@ class MainWindow(QMainWindow):
         self.dial.sliderReleased.connect(self.change1)
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
-<<<<<<< HEAD
         self.dial.setValue(350)
->>>>>>> fc5b063d6f06d6b3ec91141733c003a2e07a7802
         self.change1()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
