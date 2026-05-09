@@ -339,11 +339,11 @@ class MainWindow(QMainWindow):
         self.dial.setMaximum(650)
         self.dial.setSingleStep(25)
         self.dial.valueChanged.connect(self.value1)
-        self.dial.sliderReleased.connect(self.change1)
+        self.dial.sliderReleased.connect(self.change2)
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
         self.dial.setValue(350)
-        self.change1()
+        # self.change1()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
         self.dial2.setMinimum(200)
@@ -488,6 +488,7 @@ class MainWindow(QMainWindow):
                             max_temp = clean_dict["hb1_temps"][i]
                         if clean_dict["hb2_temps"][i] > max_temp:
                             max_temp = clean_dict["hb2_temps"][i]
+                    # set up a thing for changing back to white, if maxtemp less than 58...
                     if max_temp >= 58 and max_temp <= 64:
                         self.setStyleSheet("background-color: yellow;")
                         self.output_text.append("GETTING TOASTY...")
@@ -579,7 +580,7 @@ class MainWindow(QMainWindow):
         print(self.flag)
 
     def god(self):
-        if self.flagod == True:
+        if self.flagod:
             self.dial.setEnabled(False)
             self.flagod = False
         else:
@@ -623,10 +624,10 @@ class MainWindow(QMainWindow):
         self.output_text.append("Calibration complete.")
 
     def change2(self):
-        self.output_text2.append("Recalibrating frequency for worker 3 wait...")
-        if self.k is None:
+        self.output_text.append("Recalibrating frequency for worker 3 wait...")
+        if self.p:
             # a = self.c_speed2.text()
-            a = self.dial2.value()
+            a = self.dial.value()
             print(a)
             with open("config2.yml", "r") as file:
                 yaml = YAML()
@@ -635,13 +636,12 @@ class MainWindow(QMainWindow):
                 data["qaxe"]["asic_frequency"] = a
                 print(data)
                 print(a)
+                bridge.send_freq({"freq": a})
             with open("config2.yml", "w") as f:
                 yaml.dump(data, f)
         else:
-            self.stop_process2()
-            self.change2()
-            self.start_process2()
-        self.output_text2.append("Calibration complete.")
+            self.stop_process1()
+        self.output_text.append("Calibration complete.")
 
     def timer(self):
         self.godmode.setEnabled(True)
@@ -666,7 +666,7 @@ class MainWindow(QMainWindow):
 
     def start_process1(self):
         if self.p is None:
-            self.count = 1200
+            self.count = 120
             self.timer_flag = True
 
             print("Executing process 2...")

@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import random
+import socket
 import threading
 import time
 
@@ -97,6 +98,11 @@ class BM1366Miner:
         self.stats = influx.Stats()
 
         self.display = SSD1306(self.stats)
+
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind(("127.0.0.1", 5558))
+        self.server.listen(1)
+        self.server.setblocking(False)
 
         self.miner = self.config["miner"]
         self.verify_solo = self.config.get("verify_solo", False)
@@ -267,6 +273,17 @@ class BM1366Miner:
             self.rest_api = rest.RestAPI(rest_config, self, self.stats)
             self.rest_api.run()
 
+    def check_for_dial(self):
+        try:
+            conn, addr = self.server.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    self.asics.clock_manager.set_clock(-1, clean_dict["freq"])
+        except BlockingIOError:
+            pass  # No new mail yet
+
     def _uptime_counter_thread(self):
         logging.info("uptime counter thread started ...")
         while not self.stop_event.is_set():
@@ -336,6 +353,8 @@ class BM1366Miner:
     def _monitor_temperature(self):
         while not self.stop_event.is_set():
             temp = self.hardware.read_temperature_and_voltage()
+
+            self.check_for_dial()
 
             # trigger measurement of metrics
             if isinstance(self.asics, bm1366.BM1368):
