@@ -104,6 +104,13 @@ class BM1366Miner:
         self.server.listen(1)
         self.server.setblocking(False)
 
+        self.server2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server2.bind(("127.0.0.1", 5557))
+        self.server2.listen(1)
+        self.server2.setblocking(False)
+
+        self.there_yet = True
+
         self.miner = self.config["miner"]
         self.verify_solo = self.config.get("verify_solo", False)
         self.debug_bm1366 = self.config.get("debug_bm1366", False)
@@ -279,8 +286,36 @@ class BM1366Miner:
             with conn:
                 data = conn.recv(1024)
                 if data:
+                    a = self.asics.clock_manager.get_clock(-1)
+                    logging.info("THIS IS THE CLOCK BITCHESSSSSSS------>" + str(a))
                     clean_dict = json.loads(data.decode("utf-8"))
+
+                    self.pause_telemetry = True
+
                     self.asics.clock_manager.set_clock(-1, clean_dict["freq"])
+
+                    # self.asics.clock_manager.do_frequency_ramp_up(clean_dict["freq"])
+                    time.sleep(0.5)
+
+                    self.pause_telemetry = False
+
+        except BlockingIOError:
+            pass  # No new mail yet
+
+    def check_for_shutdown(self):
+        try:
+            conn, addr = self.server2.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+
+                    logging.info(
+                        "THIS IS WHAT IS IN SHUTDOWN--->" + str(clean_dict["bool"])
+                    )
+                    if clean_dict["bool"] == 1:
+                        self.hardware.shutdown()
+                        os._exit(1)
         except BlockingIOError:
             pass  # No new mail yet
 
@@ -352,6 +387,8 @@ class BM1366Miner:
 
     def _monitor_temperature(self):
         while not self.stop_event.is_set():
+            if hasattr(self, "pause_telemetry") and self.pause_telemetry:
+                return  # Skip this reading cycle if we are mid-clock-change
             temp = self.hardware.read_temperature_and_voltage()
 
             self.check_for_dial()
@@ -381,7 +418,7 @@ class BM1366Miner:
             # bridge.update_data(temp)
 
             bridge.send_temp(temp)
-
+            self.check_for_shutdown()
             logging.info("temperature and voltage: %s", str(temp))
 
             for i in range(0, 4):
@@ -595,6 +632,8 @@ class BM1366Miner:
 
                     if hash < network_target:
                         logging.info("!!! it seems we found a block !!!")
+
+                    self.check_for_shutdown()
 
                     # the hash isn't completly wrong but isn't lower than the target
                     # the asic uses power-of-two targets but the pool might not (eg ckpool)

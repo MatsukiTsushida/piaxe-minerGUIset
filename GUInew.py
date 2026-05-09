@@ -379,7 +379,9 @@ class MainWindow(QMainWindow):
         self.godmode_timer.timeout.connect(self.timerupdate)
         self.godmode_timer.start(100)
 
-        self.showTime = QLabel("//TIMER//")
+        self.status = QLabel("STATUS:\nSTABLE")
+        self.status.setGeometry(40, 40, 40, 40)
+        self.status.setStyleSheet("font-size: 30px; color: black")
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
         # layout.addWidget(zrame)
@@ -456,7 +458,7 @@ class MainWindow(QMainWindow):
         layout12.addWidget(self.godmode)
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
-        # layout7.addWidget(self.showTime)
+        layout7.addWidget(self.status)
 
         with open("config.yml", "r") as f:
             yaml = YAML()
@@ -491,9 +493,17 @@ class MainWindow(QMainWindow):
                     # set up a thing for changing back to white, if maxtemp less than 58...
                     if max_temp <= 58:
                         self.setStyleSheet("background-color: white;")
+                        self.status.setStyleSheet(
+                            "font-size: 30px; color: black; background-color: white"
+                        )
+                        self.status.setText("STATUS:\nSTABLE")
                     if max_temp >= 58 and max_temp <= 64:
                         self.setStyleSheet("background-color: yellow;")
                         self.output_text.append("GETTING TOASTY...")
+                        self.status.setStyleSheet(
+                            "font-size: 30px; color: blue; background-color: yellow"
+                        )
+                        self.status.setText("STATUS:\nTOASTING")
                     if max_temp >= 65:
                         self.check = False
                         self.setStyleSheet("background-color: red;")
@@ -502,6 +512,10 @@ class MainWindow(QMainWindow):
                             self.output_text.append(
                                 "WARNING! REACHING CRITICAL TEMPERATURE!!!"
                             )
+                            self.status.setStyleSheet(
+                                "font-size: 30px; color: yellow; background-color: red"
+                            )
+                            self.status.setText("STATUS:\nCRITICAL")
                             QTimer.singleShot(250 * (j + 1), self.colour)
 
                     print("Direct data received!")
@@ -626,12 +640,12 @@ class MainWindow(QMainWindow):
         self.output_text.append("Calibration complete.")
 
     def change2(self):
-        self.output_text.append("Recalibrating frequency for worker 3 wait...")
+        self.output_text.append("Recalibrating frequency for worker wait...")
         if self.p:
             # a = self.c_speed2.text()
             a = self.dial.value()
             print(a)
-            with open("config2.yml", "r") as file:
+            with open("config.yml", "r") as file:
                 yaml = YAML()
                 data = yaml.load(file)
                 print(data)
@@ -909,12 +923,16 @@ class MainWindow(QMainWindow):
             self.tempset = None
         self.output_text2.append(f"Error: {stderr}")
 
-    def stop_process1(self):
+    def SINGLESHOT(self):
         self.vol = True
         self.check = True
         self.timer_flag = False
         self.btn2.setStyleSheet("background-color: white;")
         self.setStyleSheet("background-color: white;")
+        self.status.setText("STATUS:\nSTABLE")
+        self.status.setStyleSheet(
+            "font-size: 30px; color: black; background-color: white"
+        )
         if self.p:
             self.output_text.clear()
             self.godmode.setEnabled(False)
@@ -930,6 +948,10 @@ class MainWindow(QMainWindow):
             self.btn.setEnabled(True)
             print("Process 2 finished")
             self.output_text.append("Mining process 2 finished.")
+
+    def stop_process1(self):
+        bridge.send_shutdown({"bool": 1})
+        QTimer.singleShot(2000, self.SINGLESHOT)
 
     def stop_process2(self):
         if self.k:
