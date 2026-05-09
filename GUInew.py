@@ -489,6 +489,8 @@ class MainWindow(QMainWindow):
                         if clean_dict["hb2_temps"][i] > max_temp:
                             max_temp = clean_dict["hb2_temps"][i]
                     # set up a thing for changing back to white, if maxtemp less than 58...
+                    if max_temp <= 58:
+                        self.setStyleSheet("background-color: white;")
                     if max_temp >= 58 and max_temp <= 64:
                         self.setStyleSheet("background-color: yellow;")
                         self.output_text.append("GETTING TOASTY...")
@@ -911,8 +913,8 @@ class MainWindow(QMainWindow):
         self.vol = True
         self.check = True
         self.timer_flag = False
-        self.btn2.setStyleSheet("background-color: grey;")
-        self.setStyleSheet("background-color: grey;")
+        self.btn2.setStyleSheet("background-color: white;")
+        self.setStyleSheet("background-color: white;")
         if self.p:
             self.output_text.clear()
             self.godmode.setEnabled(False)
