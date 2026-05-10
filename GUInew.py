@@ -204,13 +204,14 @@ class MainWindow(QMainWindow):
         self.pid2 = 0
 
         # Create button
-        self.btn = QPushButton("Start mining worker2")
+        self.btn = QPushButton("Start mining worker")
         self.btn.setFixedSize(QSize(200, 100))
         self.btn.pressed.connect(self.start_process1)
 
-        self.btn2 = QPushButton("Stop mining worker2")
+        self.btn2 = QPushButton("Stop mining worker")
         self.btn2.setFixedSize(QSize(200, 100))
         self.btn2.pressed.connect(self.stop_process1)
+        self.btn2.setEnabled(False)
 
         self.btn3 = QPushButton("Start mining worker3")
         self.btn3.setFixedSize(QSize(200, 100))
@@ -382,6 +383,10 @@ class MainWindow(QMainWindow):
         self.status = QLabel("STATUS:\nSTABLE")
         self.status.setGeometry(40, 40, 40, 40)
         self.status.setStyleSheet("font-size: 30px; color: black")
+
+        self.hashratestatus = QLabel("HASH RATE:\n")
+        self.hashratestatus.setGeometry(40, 40, 40, 40)
+        self.hashratestatus.setStyleSheet("font-size: 30px; color: black")
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
         # layout.addWidget(zrame)
@@ -459,6 +464,7 @@ class MainWindow(QMainWindow):
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
         layout7.addWidget(self.status)
+        layout7.addWidget(self.hashratestatus)
 
         with open("config.yml", "r") as f:
             yaml = YAML()
@@ -496,11 +502,17 @@ class MainWindow(QMainWindow):
                         self.status.setStyleSheet(
                             "font-size: 30px; color: black; background-color: white"
                         )
+                        self.hashratestatus.setStyleSheet(
+                            "font-size: 30px; color: black; background-color: white"
+                        )
                         self.status.setText("STATUS:\nSTABLE")
                     if max_temp >= 58 and max_temp <= 64:
                         self.setStyleSheet("background-color: yellow;")
                         self.output_text.append("GETTING TOASTY...")
                         self.status.setStyleSheet(
+                            "font-size: 30px; color: blue; background-color: yellow"
+                        )
+                        self.hashratestatus.setStyleSheet(
                             "font-size: 30px; color: blue; background-color: yellow"
                         )
                         self.status.setText("STATUS:\nTOASTING")
@@ -513,6 +525,9 @@ class MainWindow(QMainWindow):
                                 "WARNING! REACHING CRITICAL TEMPERATURE!!!"
                             )
                             self.status.setStyleSheet(
+                                "font-size: 30px; color: yellow; background-color: red"
+                            )
+                            self.hashratestatus.setStyleSheet(
                                 "font-size: 30px; color: yellow; background-color: red"
                             )
                             self.status.setText("STATUS:\nCRITICAL")
@@ -565,6 +580,9 @@ class MainWindow(QMainWindow):
                     if not self.vol:
                         self.output_text.append(
                             f"Miner running with hash rate...\n{clean_dict['hash'][1:]} GH"
+                        )
+                        self.hashratestatus.setText(
+                            f"HASH RATE:\n{clean_dict['hash'][1:9]} GH"
                         )
                     print("Direct HASH DATA received!")
                     if self.flag:
@@ -678,7 +696,6 @@ class MainWindow(QMainWindow):
             # getting text from count
             text = str(self.count / 10) + " s"
             self.godmode.setText(text)
-            print("REMAINING TIME ->", text)
 
     def start_process1(self):
         if self.p is None:
@@ -891,6 +908,7 @@ class MainWindow(QMainWindow):
         #
         if "16 chips were found!" in stderr:
             self.vol = False
+            self.btn2.setEnabled(True)
         if self.vol:
             self.output_text.append(f"Error: {stderr}")
 
@@ -928,6 +946,9 @@ class MainWindow(QMainWindow):
         self.check = True
         self.timer_flag = False
         self.btn2.setStyleSheet("background-color: white;")
+        self.hashratestatus.setStyleSheet(
+            "font-size: 30px; color: black; background-color: white"
+        )
         self.setStyleSheet("background-color: white;")
         self.status.setText("STATUS:\nSTABLE")
         self.status.setStyleSheet(
