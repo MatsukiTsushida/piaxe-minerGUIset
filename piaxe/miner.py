@@ -292,9 +292,13 @@ class BM1366Miner:
 
                     self.pause_telemetry = True
 
-                    self.asics.clock_manager.set_clock(-1, clean_dict["freq"])
+                    if clean_dict["id"] == -1:
+                        self.asics.clock_manager.do_ramp_up_dial(-1, clean_dict["freq"])
+                    else:
+                        self.asics.clock_manager.do_ramp_up_dial(
+                            clean_dict["id"], clean_dict["freq"]
+                        )
 
-                    # self.asics.clock_manager.do_frequency_ramp_up(clean_dict["freq"])
                     time.sleep(0.5)
 
                     self.pause_telemetry = False

@@ -652,8 +652,8 @@ class MainWindow(QMainWindow):
                 data["qaxe"]["asic_frequency"] = a
                 print(data)
                 print(a)
-                bridge.send_freq({"freq": a})
-            with open("config2.yml", "w") as f:
+                bridge.send_freq({"freq": a, "id": -1})
+            with open("config.yml", "w") as f:
                 yaml.dump(data, f)
         else:
             self.stop_process1()
@@ -951,7 +951,7 @@ class MainWindow(QMainWindow):
 
     def stop_process1(self):
         bridge.send_shutdown({"bool": 1})
-        QTimer.singleShot(2000, self.SINGLESHOT)
+        QTimer.singleShot(3000, self.SINGLESHOT)
 
     def stop_process2(self):
         if self.k:
