@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
         self.dial.setValue(350)
-        # self.change1()
+        self.change2()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
         self.dial2.setMinimum(200)
@@ -699,7 +699,7 @@ class MainWindow(QMainWindow):
 
     def start_process1(self):
         if self.p is None:
-            self.count = 120
+            self.count = 1200
             self.timer_flag = True
 
             print("Executing process 2...")
