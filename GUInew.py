@@ -361,7 +361,7 @@ class MainWindow(QMainWindow):
         # self.freq4.setAlignment(Qt.AlignCenter)
         # self.freq4.setMaximumHeight(50)
         #
-        self.godmode = QPushButton("¡Godmode!")
+        self.godmode = QPushButton("¡Sudo!")
         self.godmode.setStyleSheet(
             "background-color : red; font-size: 30px; color: blue"
         )
