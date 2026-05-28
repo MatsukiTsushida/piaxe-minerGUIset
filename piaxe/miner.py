@@ -102,12 +102,14 @@ class BM1366Miner:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(("127.0.0.1", 5558))
         self.server.listen(1)
-        self.server.setblocking(False)
+        self.server.setblocking(True)
+        self.dial_thread = None
 
         self.server2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server2.bind(("127.0.0.1", 5557))
         self.server2.listen(1)
-        self.server2.setblocking(False)
+        self.server2.setblocking(True)
+        self.shutdown_check = None
 
         self.there_yet = True
 
@@ -136,6 +138,8 @@ class BM1366Miner:
             self.led_thread,
             self.uptime_counter_thread,
             self.alerter_thread,
+            self.dial_thread,
+            self.shutdown_check,
         ]:
             if t is not None:
                 t.join(5)
@@ -213,6 +217,12 @@ class BM1366Miner:
         self.temp_thread = threading.Thread(target=self._monitor_temperature)
         self.temp_thread.start()
 
+        self.dial_thread = threading.Thread(target=self._dial_listener_thread)
+        self.dial_thread.start()
+
+        self.shutdown_check = threading.Thread(target=self._check_for_shutdown)
+        self.shutdown_check.start()
+
         self.receive_thread = threading.Thread(target=self._receive_thread)
         self.receive_thread.start()
 
@@ -280,48 +290,95 @@ class BM1366Miner:
             self.rest_api = rest.RestAPI(rest_config, self, self.stats)
             self.rest_api.run()
 
-    def check_for_dial(self):
-        try:
-            conn, addr = self.server.accept()
-            with conn:
-                data = conn.recv(1024)
-                if data:
-                    a = self.asics.clock_manager.get_clock(-1)
-                    logging.info("THIS IS THE CLOCK BITCHESSSSSSS------>" + str(a))
-                    clean_dict = json.loads(data.decode("utf-8"))
+    def _dial_listener_thread(self):
+        logging.info("Dial listener thread started ...")
+        while not self.stop_event.is_set():
+            try:
+                # Set a small timeout on the socket accept so it periodically
+                # wakes up to check if self.stop_event was triggered for shutdown
+                self.server.settimeout(1.0)
+                conn, addr = self.server.accept()
 
-                    self.pause_telemetry = True
+                with conn:
+                    # Clear timeout back to standard blocking mode to read data safely
+                    conn.settimeout(None)
+                    data = conn.recv(1024)
+                    if data:
+                        clean_dict = json.loads(data.decode("utf-8"))
+                        logging.info("Received dynamic frequency change request!")
 
-                    if clean_dict["id"] == -1:
-                        self.asics.clock_manager.do_ramp_up_dial(-1, clean_dict["freq"])
-                    else:
-                        self.asics.clock_manager.do_ramp_up_dial(
-                            clean_dict["id"], clean_dict["freq"]
+                        # Safely pause telemetry processing
+                        self.pause_telemetry = True
+
+                        if clean_dict["id"] == -1:
+                            self.asics.clock_manager.do_ramp_up_dial(
+                                -1, clean_dict["freq"]
+                            )
+                        else:
+                            for i in range(len(clean_dict["id"])):
+                                self.asics.clock_manager.do_ramp_up_dial(
+                                    clean_dict["id"][i], clean_dict["freq"]
+                                )
+
+                        time.sleep(0.5)
+                        self.pause_telemetry = False
+
+            except socket.timeout:
+                # This timeout is expected! It just lets the loop check if the miner is stopping
+                continue
+            except Exception as e:
+                logging.error(f"Error in dial listener socket: {e}")
+                time.sleep(1)
+
+        logging.info("Dial listener thread ended ...")
+
+    def _check_for_shutdown(self):
+        logging.info("Shutdown listener thread started ...")
+        while not self.stop_event.is_set():
+            try:
+                # Set a small timeout on the socket accept so it periodically
+                # wakes up to check if self.stop_event was triggered for shutdown
+                self.server2.settimeout(1.0)
+                conn, addr = self.server2.accept()
+
+                with conn:
+                    # Clear timeout back to standard blocking mode to read data safely
+                    conn.settimeout(None)
+                    data = conn.recv(1024)
+                    if data:
+                        clean_dict = json.loads(data.decode("utf-8"))
+
+                        logging.info(
+                            "THIS IS WHAT IS IN SHUTDOWN--->" + str(clean_dict["bool"])
                         )
+                        if clean_dict["bool"] == 1:
+                            self.hardware.shutdown()
+                            os._exit(1)
+            except socket.timeout:
+                # This timeout is expected! It just lets the loop check if the miner is stopping
+                continue
+            except Exception as e:
+                logging.error(f"Error in shutdown listener socket: {e}")
+                time.sleep(1)
 
-                    time.sleep(0.5)
+        logging.info("Shutdown listener thread ended ...")
 
-                    self.pause_telemetry = False
+    # def check_for_shutdown(self):
+    #     try:
+    #         conn, addr = self.server2.accept()
+    #         with conn:
+    #             data = conn.recv(1024)
+    #             if data:
+    #                 clean_dict = json.loads(data.decode("utf-8"))
 
-        except BlockingIOError:
-            pass  # No new mail yet
-
-    def check_for_shutdown(self):
-        try:
-            conn, addr = self.server2.accept()
-            with conn:
-                data = conn.recv(1024)
-                if data:
-                    clean_dict = json.loads(data.decode("utf-8"))
-
-                    logging.info(
-                        "THIS IS WHAT IS IN SHUTDOWN--->" + str(clean_dict["bool"])
-                    )
-                    if clean_dict["bool"] == 1:
-                        self.hardware.shutdown()
-                        os._exit(1)
-        except BlockingIOError:
-            pass  # No new mail yet
+    #                 logging.info(
+    #                     "THIS IS WHAT IS IN SHUTDOWN--->" + str(clean_dict["bool"])
+    #                 )
+    #                 if clean_dict["bool"] == 1:
+    #                     self.hardware.shutdown()
+    #                     os._exit(1)
+    #     except BlockingIOError:
+    #         pass  # No new mail yet
 
     def _uptime_counter_thread(self):
         logging.info("uptime counter thread started ...")
@@ -392,10 +449,11 @@ class BM1366Miner:
     def _monitor_temperature(self):
         while not self.stop_event.is_set():
             if hasattr(self, "pause_telemetry") and self.pause_telemetry:
-                return  # Skip this reading cycle if we are mid-clock-change
+                time.sleep(0.1)
+                continue  # Skip this reading cycle if we are mid-clock-change
             temp = self.hardware.read_temperature_and_voltage()
 
-            self.check_for_dial()
+            # self.check_for_dial()
 
             # trigger measurement of metrics
             if isinstance(self.asics, bm1366.BM1368):
@@ -422,7 +480,7 @@ class BM1366Miner:
             # bridge.update_data(temp)
 
             bridge.send_temp(temp)
-            self.check_for_shutdown()
+            # self.check_for_shutdown()
             logging.info("temperature and voltage: %s", str(temp))
 
             for i in range(0, 4):
@@ -637,7 +695,7 @@ class BM1366Miner:
                     if hash < network_target:
                         logging.info("!!! it seems we found a block !!!")
 
-                    self.check_for_shutdown()
+                    # self.check_for_shutdown()
 
                     # the hash isn't completly wrong but isn't lower than the target
                     # the asic uses power-of-two targets but the pool might not (eg ckpool)

@@ -663,6 +663,7 @@ class MainWindow(QMainWindow):
             # a = self.c_speed2.text()
             a = self.dial.value()
             print(a)
+
             with open("config.yml", "r") as file:
                 yaml = YAML()
                 data = yaml.load(file)
@@ -670,10 +671,19 @@ class MainWindow(QMainWindow):
                 data["qaxe"]["asic_frequency"] = a
                 print(data)
                 print(a)
-                bridge.send_freq({"freq": a, "id": -1})
+                QTimer.singleShot(200, lambda: bridge.send_freq({"freq": a, "id": -1}))
+                # bridge.send_freq({"freq": a, "id": -1})
+
             with open("config.yml", "w") as f:
                 yaml.dump(data, f)
         else:
+            a = self.dial.value()
+            with open("config.yml", "r") as file:
+                yaml = YAML()
+                data = yaml.load(file)
+                data["qaxe"]["asic_frequency"] = a
+            with open("config.yml", "w") as f:
+                yaml.dump(data, f)
             self.stop_process1()
         self.output_text.append("Calibration complete.")
 
@@ -688,7 +698,7 @@ class MainWindow(QMainWindow):
                 self.timer()
                 # making flag false
                 self.timer_flag = False
-                self.godmode.setText("¡Godmode!")
+                self.godmode.setText("¡Sudo!")
                 # setting text to the label
                 print("TIMER Completed !!!! ")
 
@@ -699,7 +709,7 @@ class MainWindow(QMainWindow):
 
     def start_process1(self):
         if self.p is None:
-            self.count = 1200
+            self.count = 120
             self.timer_flag = True
 
             print("Executing process 2...")
