@@ -165,21 +165,65 @@ class ClockManager:
             time.sleep(0.100)
 
     def do_ramp_up_dial(self, id, freq):
-        current = self.get_clock(id)[0]
-        target = freq
         step = 5
-        if current < target:
-            while current < target:
-                next_step = min(step, target - current)
-                current += next_step
-                self.set_clock(id, current)
-                time.sleep(0.300)
+        target = freq
+
+        # CASE 1: Handle global update for all ASICs individually
+        if id == -1:
+            for asic_id in range(self.num_asics):
+                # Read directly from the internal list variable!
+                current = float(self.clocks[asic_id])
+
+                if current < target:
+                    while current < target:
+                        next_step = min(step, target - current)
+                        current += next_step
+                        self.set_clock(asic_id, current)
+                        time.sleep(0.100)
+                else:
+                    while current > target:
+                        next_step = min(step, current - target)
+                        current -= next_step
+                        self.set_clock(asic_id, current)
+                        time.sleep(0.100)
+
+        # CASE 2: Handle a single specific ASIC ID
         else:
-            while current > target:
-                next_step = min(step, current - target)
-                current -= next_step
-                self.set_clock(id, current)
-                time.sleep(0.300)
+            # We already know it's a single value here, but we cast safely
+            current = float(self.clocks[id])
+
+            if current < target:
+                while current < target:
+                    next_step = min(step, target - current)
+                    current += next_step
+                    self.set_clock(id, current)
+                    time.sleep(0.300)
+            else:
+                while current > target:
+                    next_step = min(step, current - target)
+                    current -= next_step
+                    self.set_clock(id, current)
+                    time.sleep(0.300)
+
+    # def do_ramp_up_dial(self, id, freq):
+    #     if id == -1:
+    #         current = self.get_clock(id)[0]
+    #     else:
+    #         current = self.get_clock(id)
+    #     target = freq
+    #     step = 5
+    #     if current < target:
+    #         while current < target:
+    #             next_step = min(step, target - current)
+    #             current = current + next_step
+    #             self.set_clock(id, current)
+    #             time.sleep(0.300)
+    #     else:
+    #         while current > target:
+    #             next_step = min(step, current - target)
+    #             current = current - next_step
+    #             self.set_clock(id, current)
+    #             time.sleep(0.300)
 
 
 class BM1366:

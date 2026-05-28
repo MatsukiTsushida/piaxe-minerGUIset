@@ -12,6 +12,7 @@ from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer, center
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
     QApplication,
+    QCheckBox,
     QDial,
     QDialog,
     QDialogButtonBox,
@@ -146,6 +147,8 @@ class MainWindow(QMainWindow):
         self.hash2 = None
         self.tempset2 = None
 
+        self.chips_id = []
+
         # Server to fetch Data
         self.server1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server1.bind(("127.0.0.1", 5555))
@@ -181,6 +184,7 @@ class MainWindow(QMainWindow):
         layout12 = QHBoxLayout()
         layout13 = QVBoxLayout()
         layout14 = QVBoxLayout()
+        layout15 = QGridLayout()
 
         zrame = QFrame()
         zrame.resize(1, 1)
@@ -387,6 +391,43 @@ class MainWindow(QMainWindow):
         self.hashratestatus = QLabel("HASH RATE:\n")
         self.hashratestatus.setGeometry(40, 40, 40, 40)
         self.hashratestatus.setStyleSheet("font-size: 30px; color: black")
+
+        self.asic1 = QCheckBox("asic1")
+        self.asic2 = QCheckBox("asic2")
+        self.asic3 = QCheckBox("asic3")
+        self.asic4 = QCheckBox("asic4")
+        self.asic5 = QCheckBox("asic5")
+        self.asic6 = QCheckBox("asic6")
+        self.asic7 = QCheckBox("asic7")
+        self.asic8 = QCheckBox("asic8")
+        self.asic9 = QCheckBox("asic9")
+        self.asic10 = QCheckBox("asic10")
+        self.asic11 = QCheckBox("asic11")
+        self.asic12 = QCheckBox("asic12")
+        self.asic13 = QCheckBox("asic13")
+        self.asic14 = QCheckBox("asic14")
+        self.asic15 = QCheckBox("asic15")
+        self.asic16 = QCheckBox("asic16")
+
+        self.asic_checkboxes = [
+            self.asic1,
+            self.asic2,
+            self.asic3,
+            self.asic4,
+            self.asic5,
+            self.asic6,
+            self.asic7,
+            self.asic8,
+            self.asic9,
+            self.asic10,
+            self.asic11,
+            self.asic12,
+            self.asic13,
+            self.asic14,
+            self.asic15,
+            self.asic16,
+        ]
+
         # layout.addLayout(layout3)
         # zrame.setLayout(layout4)
         # layout.addWidget(zrame)
@@ -459,7 +500,28 @@ class MainWindow(QMainWindow):
         layout9.addWidget(self.temp_out15)
         layout9.addWidget(self.temp_out14)
         layout9.addWidget(self.temp_out13)
-        layout12.addWidget(self.output_text)
+
+        layout15.addWidget(self.asic1, 0, 0)
+        layout15.addWidget(self.asic2, 0, 1)
+        layout15.addWidget(self.asic3, 0, 2)
+        layout15.addWidget(self.asic4, 0, 3)
+
+        layout15.addWidget(self.asic5, 1, 0)
+        layout15.addWidget(self.asic6, 1, 1)
+        layout15.addWidget(self.asic7, 1, 2)
+        layout15.addWidget(self.asic8, 1, 3)
+
+        layout15.addWidget(self.asic9, 2, 0)
+        layout15.addWidget(self.asic10, 2, 1)
+        layout15.addWidget(self.asic11, 2, 2)
+        layout15.addWidget(self.asic12, 2, 3)
+
+        layout15.addWidget(self.asic13, 3, 0)
+        layout15.addWidget(self.asic14, 3, 1)
+        layout15.addWidget(self.asic15, 3, 2)
+        layout15.addWidget(self.asic16, 3, 3)
+
+        layout12.addLayout(layout15)
         layout12.addWidget(self.godmode)
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
@@ -609,6 +671,16 @@ class MainWindow(QMainWindow):
                 print(f"Error connecting to PostgreSQL: {e}")
                 return False
 
+    def whoChecked(self):
+        chips = self.asic_checkboxes
+        for i in range(len(chips)):
+            if chips[i].isChecked() and i not in self.chips_id:
+                self.chips_id.append(i)
+            elif not chips[i].isChecked() and i in self.chips_id:
+                self.chips_id.remove(i)
+            else:
+                pass
+
     def pressed_ok(self):
         self.flag = True
         print(self.flag)
@@ -671,7 +743,15 @@ class MainWindow(QMainWindow):
                 data["qaxe"]["asic_frequency"] = a
                 print(data)
                 print(a)
-                QTimer.singleShot(200, lambda: bridge.send_freq({"freq": a, "id": -1}))
+                self.whoChecked()
+                if self.chips_id == []:
+                    QTimer.singleShot(
+                        200, lambda: bridge.send_freq({"freq": a, "id": -1})
+                    )
+                else:
+                    QTimer.singleShot(
+                        200, lambda: bridge.send_freq({"freq": a, "id": self.chips_id})
+                    )
                 # bridge.send_freq({"freq": a, "id": -1})
 
             with open("config.yml", "w") as f:
