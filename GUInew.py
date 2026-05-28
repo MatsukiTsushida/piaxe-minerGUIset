@@ -789,7 +789,7 @@ class MainWindow(QMainWindow):
 
     def start_process1(self):
         if self.p is None:
-            self.count = 120
+            self.count = 1200
             self.timer_flag = True
 
             print("Executing process 2...")
