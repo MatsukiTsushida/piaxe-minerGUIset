@@ -140,6 +140,7 @@ class BM1366Miner:
             self.alerter_thread,
             self.dial_thread,
             self.shutdown_check,
+            self.asic_per_thread,
         ]:
             if t is not None:
                 t.join(5)
@@ -220,6 +221,9 @@ class BM1366Miner:
         self.dial_thread = threading.Thread(target=self._dial_listener_thread)
         self.dial_thread.start()
 
+        self.asic_per_thread = threading.Thread(target=self._asic_per_listener)
+        self.asic_per_thread.start()
+
         self.shutdown_check = threading.Thread(target=self._check_for_shutdown)
         self.shutdown_check.start()
 
@@ -290,6 +294,19 @@ class BM1366Miner:
             self.rest_api = rest.RestAPI(rest_config, self, self.stats)
             self.rest_api.run()
 
+    def _asic_per_listener(self):
+        logging.info("Dial listener thread started ...")
+        while not self.stop_event.is_set():
+            try:
+                asics = {"n": []}
+                asics["n"] = self.asics.clock_manager.get_clocks()
+                bridge.send_per_asic(asics)
+            except socket.timeout:
+                continue
+            except Exception as e:
+                logging.error(f"Error in dial listener socket: {e}")
+                time.sleep(1)
+
     def _dial_listener_thread(self):
         logging.info("Dial listener thread started ...")
         while not self.stop_event.is_set():
@@ -319,6 +336,10 @@ class BM1366Miner:
                                 self.asics.clock_manager.do_ramp_up_dial(
                                     clean_dict["id"][i], clean_dict["freq"]
                                 )
+
+                        # asics = {"n": []}
+                        # asics["n"] = self.asics.clock_manager.get_clocks()
+                        # bridge.send_per_asic(asics)
 
                         time.sleep(0.5)
                         self.pause_telemetry = False

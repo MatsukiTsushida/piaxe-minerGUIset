@@ -160,6 +160,11 @@ class MainWindow(QMainWindow):
         self.server2.listen(1)
         self.server2.setblocking(False)
 
+        self.server3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server3.bind(("127.0.0.1", 5553))
+        self.server3.listen(1)
+        self.server3.setblocking(False)
+
         self.buttonBox = QMessageBox()
         self.buttonBox.setText("Do you want to add a DataBase for Grafana?")
         self.buttonBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
@@ -593,6 +598,20 @@ class MainWindow(QMainWindow):
         #     self.freq2.setText(str(data["qaxe"]["asic_frequency"]) + 'Mhz')
         #     self.dial2.setValue(data["qaxe"]["asic_frequency"])
 
+    def check_for_asics(self):
+        try:
+            conn, addr = self.server3.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    for i in range(len(self.asic_checkboxes)):
+                        self.asic_checkboxes[i].setText(
+                            str(i + 1) + "-" + str(clean_dict["n"][i])
+                        )
+        except BlockingIOError:
+            pass  # No new mail yet
+
     def check_for_incoming_data(self):
         try:
             conn, addr = self.server1.accept()
@@ -884,6 +903,10 @@ class MainWindow(QMainWindow):
             self.mail_timer2 = QTimer()
             self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
             self.mail_timer2.start(1000)
+
+            self.mail_timer3 = QTimer()
+            self.mail_timer3.timeout.connect(self.check_for_asics)
+            self.mail_timer3.start(1000)
 
             # Update button text
             self.btn.setText("Mining2...")

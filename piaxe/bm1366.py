@@ -152,6 +152,12 @@ class ClockManager:
         else:
             return self.clocks[id]
 
+    def get_clocks(self):
+        res = []
+        for i in range(len(self.clocks)):
+            res.append(self.clocks[i])
+        return res
+
     def do_frequency_ramp_up(self, frequency):
         start = current = 56.25
         step = 6.25
@@ -197,13 +203,13 @@ class ClockManager:
                     next_step = min(step, target - current)
                     current += next_step
                     self.set_clock(id, current)
-                    time.sleep(0.300)
+                    time.sleep(0.100)
             else:
                 while current > target:
                     next_step = min(step, current - target)
                     current -= next_step
                     self.set_clock(id, current)
-                    time.sleep(0.300)
+                    time.sleep(0.100)
 
     # def do_ramp_up_dial(self, id, freq):
     #     if id == -1:
