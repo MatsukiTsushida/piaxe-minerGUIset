@@ -186,12 +186,20 @@ class ClockManager:
                         current += next_step
                         self.set_clock(asic_id, current)
                         time.sleep(0.100)
+
+                        # # FIXED: Clear line for single adjustments
+                        # if hasattr(self.bm1366, "serial_rx_func"):
+                        #     self.bm1366.serial_rx_func(11, 5)
                 else:
                     while current > target:
                         next_step = min(step, current - target)
                         current -= next_step
                         self.set_clock(asic_id, current)
                         time.sleep(0.100)
+
+                        # # FIXED: Clear line for single adjustments
+                        # if hasattr(self.bm1366, "serial_rx_func"):
+                        #     self.bm1366.serial_rx_func(11, 5)
 
         # CASE 2: Handle a single specific ASIC ID
         else:
@@ -204,12 +212,20 @@ class ClockManager:
                     current += next_step
                     self.set_clock(id, current)
                     time.sleep(0.100)
+
+                    # # FIXED: Clear line for single adjustments
+                    # if hasattr(self.bm1366, "serial_rx_func"):
+                    #     self.bm1366.serial_rx_func(11, 5)
             else:
                 while current > target:
                     next_step = min(step, current - target)
                     current -= next_step
                     self.set_clock(id, current)
                     time.sleep(0.100)
+
+                    # # FIXED: Clear line for single adjustments
+                    # if hasattr(self.bm1366, "serial_rx_func"):
+                    #     self.bm1366.serial_rx_func(11, 5)
 
     # def do_ramp_up_dial(self, id, freq):
     #     if id == -1:

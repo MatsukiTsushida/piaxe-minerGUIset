@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 
 import psycopg2
+import serial.tools.list_ports
 from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer, center
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
@@ -859,68 +860,81 @@ class MainWindow(QMainWindow):
             self.godmode.setText(text)
 
     def start_process1(self):
+        ports = serial.tools.list_ports.comports()
+        detected_asic_port = None
+
         if self.p is None:
-            self.count = 1200
-            self.timer_flag = True
+            for port in ports:
+                # Look for your specific devkit VID/PID signature or standard ttyACM paths
+                if (
+                    (port.vid == 0xCAFE and port.pid == 0x4003)
+                    or "ttyACM" in port.device
+                    or "ttyUSB" in port.device
+                ):
+                    detected_asic_port = port.device
+                    break
+            if detected_asic_port != None:
+                self.count = 1200
+                self.timer_flag = True
 
-            print("Executing process 2...")
-            self.output_text.append("Starting mining process 2...")
+                print("Executing process 2...")
+                self.output_text.append("Starting mining process 2...")
 
-            self.p = QProcess()
-            self.p.readyReadStandardOutput.connect(self.handle_stdout)
-            self.p.readyReadStandardError.connect(self.handle_stderr)
+                self.p = QProcess()
+                self.p.readyReadStandardOutput.connect(self.handle_stdout)
+                self.p.readyReadStandardError.connect(self.handle_stderr)
 
-            # Method 1: Use QProcess.start() with separate arguments
-            program = "python3"
-            arguments = [
-                "pyminer.py",
-                "-c",
-                "config.yml",
-                "-o",
-                "stratum+tcp://de.kano.is:3333",
-                "-u",
-                "flowsolve.test16-daniel",
-                "-p",
-                "X",
-                "-d",
-            ]
+                # Method 1: Use QProcess.start() with separate arguments
+                program = "python3"
+                arguments = [
+                    "pyminer.py",
+                    "-c",
+                    "config.yml",
+                    "-o",
+                    "stratum+tcp://de.kano.is:3333",
+                    "-u",
+                    "flowsolve.test16-daniel",
+                    "-p",
+                    "X",
+                    "-d",
+                ]
 
-            self.p.start(program, arguments)
-            self.pid1 = self.p.processId()
+                self.p.start(program, arguments)
+                self.pid1 = self.p.processId()
 
-            with open("config.yml", "r") as f:
-                yaml = YAML()
-                data = yaml.load(f)
-                print(data["qaxe"]["asic_frequency"])
-                self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
-                self.dial.setValue(data["qaxe"]["asic_frequency"])
+                with open("config.yml", "r") as f:
+                    yaml = YAML()
+                    data = yaml.load(f)
+                    print(data["qaxe"]["asic_frequency"])
+                    self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
+                    self.dial.setValue(data["qaxe"]["asic_frequency"])
 
-            # checking for temperature data
-            self.mail_timer = QTimer()
-            self.mail_timer.timeout.connect(self.check_for_incoming_data)
-            self.mail_timer.start(1000)  # Check every second
+                # checking for temperature data
+                self.mail_timer = QTimer()
+                self.mail_timer.timeout.connect(self.check_for_incoming_data)
+                self.mail_timer.start(1000)  # Check every second
 
-            self.mail_timer2 = QTimer()
-            self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
-            self.mail_timer2.start(1000)
+                self.mail_timer2 = QTimer()
+                self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
+                self.mail_timer2.start(1000)
 
-            self.mail_timer3 = QTimer()
-            self.mail_timer3.timeout.connect(self.check_for_asics)
-            self.mail_timer3.start(1000)
+                self.mail_timer3 = QTimer()
+                self.mail_timer3.timeout.connect(self.check_for_asics)
+                self.mail_timer3.start(1000)
 
-            # Update button text
-            self.btn.setText("Mining2...")
-            self.btn.setEnabled(False)
+                # Update button text
+                self.btn.setText("Mining2...")
+                self.btn.setEnabled(False)
 
-            devices = find_devices()  # uses default VID=0xCAFE, PID=0x4003
-            for dev in devices:
-                print(dev)
-                n = dev.interface_0.port
-                print(n[4:])
-                print(dev.interface_1.port)
-                print(f"  IF2 → {dev.interface_2.port}")
+                devices = find_devices()  # uses default VID=0xCAFE, PID=0x4003
+                for dev in devices:
+                    print(dev)
+                    n = dev.interface_0.port
+                    print(n[4:])
+                    print(dev.interface_1.port)
+                    print(f"  IF2 → {dev.interface_2.port}")
         else:
-            print("Process already 2 running")
+            print("Process already running")
 
     def colour(self):
         self.btn2.setStyleSheet("background-color: orange;")
