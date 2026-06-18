@@ -14,6 +14,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QDial,
     QDialog,
     QDialogButtonBox,
@@ -33,6 +34,7 @@ from PyQt5.QtWidgets import (
 from ruamel.yaml import YAML
 
 import bridge
+from ProfDialog import ProfileDialog
 from usb_detect import DeviceInterfaces, find_devices
 
 # Database connection parameters
@@ -190,7 +192,7 @@ class MainWindow(QMainWindow):
         layout12 = QHBoxLayout()
         layout13 = QVBoxLayout()
         layout14 = QVBoxLayout()
-        layout15 = QGridLayout()
+        layout15 = QVBoxLayout()
 
         layoutA1 = QVBoxLayout()
         layoutA2 = QVBoxLayout()
@@ -397,6 +399,9 @@ class MainWindow(QMainWindow):
         self.godmode.pressed.connect(self.god)
         self.godmode.setEnabled(False)
 
+        self.jsbutton = QPushButton("Profiles")
+        self.jsbutton.pressed.connect(self.open_profile_management)
+
         self.label1 = QLabel("Hash Board 1")
         self.label1.setMaximumHeight(20)
         self.label1.setAlignment(Qt.AlignCenter)
@@ -548,7 +553,8 @@ class MainWindow(QMainWindow):
         # layout6.addWidget(self.temp_out8)
         # layout6.addWidget(self.temp_out7)
         # layout6.addWidget(self.temp_out6)
-        # layout6.addWidget(self.temp_out5)
+        # layout6.addWidget(self.temp_out5)def apply_json_profile_to_asics(self, prf):
+
         # layout8.addWidget(self.temp_out9)
         # layout8.addWidget(self.temp_out10)
         # layout8.addWidget(self.temp_out11)
@@ -580,7 +586,10 @@ class MainWindow(QMainWindow):
 
         # layout12.addLayout(layout15)
         layout12.addWidget(self.output_text)
-        layout12.addWidget(self.godmode)
+        layout15.addWidget(self.godmode)
+        layout15.addWidget(self.jsbutton)
+        layout12.addLayout(layout15)
+
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
         layout7.addWidget(self.status)
@@ -592,12 +601,36 @@ class MainWindow(QMainWindow):
             print(data["qaxe"]["asic_frequency"])
             self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
             self.dial.setValue(data["qaxe"]["asic_frequency"])
+
         # with open('config2.yml', 'r') as f:
         #     yaml = YAML()
         #     data = yaml.load(f)
         #     print(data["qaxe"]["asic_frequency"])
         #     self.freq2.setText(str(data["qaxe"]["asic_frequency"]) + 'Mhz')
         #     self.dial2.setValue(data["qaxe"]["asic_frequency"])
+        #
+
+    # def apply_json_profile_to_asics(self, prf):
+
+    def open_profile_management(self):
+        """Spins up and executes the profile dialog window fresh."""
+        # 'self' here refers to MainWindow, setting it as the dialog's parent!
+        dialog = ProfileDialog(self)
+
+        # .exec_() opens the window and freezes code execution right here
+        # until the user closes or clicks a button inside ProfileDialog
+        result = dialog.exec_()
+
+        # Check if they clicked 'Select' or closed it
+        if result == QDialog.Accepted:  # Adjusted for PyQt5 syntax
+            # Safely read the string from the dialog's dropdown before it unloads
+            chosen_profile = dialog.dropdownjs.currentText()
+
+            if chosen_profile and chosen_profile != "No profiles found":
+                self.output_text.append(f"Applying profile setup: {chosen_profile}")
+                # self.apply_json_profile_to_asics(chosen_profile)
+        else:
+            self.output_text.append("Profile selection cancelled.")
 
     def check_for_asics(self):
         try:
@@ -874,7 +907,7 @@ class MainWindow(QMainWindow):
                     detected_asic_port = port.device
                     break
             if detected_asic_port != None:
-                self.count = 1200
+                self.count = 120
                 self.timer_flag = True
 
                 print("Executing process 2...")
