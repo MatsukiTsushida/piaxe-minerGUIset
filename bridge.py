@@ -52,3 +52,13 @@ def send_per_asic(data):
             s.sendall(json.dumps(data).encode("utf-8"))
     except:
         pass  # GUI isn't listening, no big deal
+
+
+def send_asic_list(data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            s.connect(("127.0.0.1", 5560))
+            s.sendall(json.dumps(data).encode("utf-8"))
+    except:
+        pass  # GUI isn't listening, no big deal

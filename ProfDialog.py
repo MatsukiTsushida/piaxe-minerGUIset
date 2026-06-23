@@ -53,6 +53,12 @@ class ProfileDialog(QDialog):
         self.choose.clicked.connect(self.select_prof)
         self.input = QInputDialog()
         self.input.setLabelText("New instead? Give it a name:")
+        self.input.accepted.connect(self.new_prof)
+
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind(("127.0.0.1", 5560))
+        self.server.listen(1)
+        self.server.setblocking(False)
 
         try:
             self.profiles_dir = os.path.join(os.path.dirname(__file__), "Profiles")
@@ -87,4 +93,22 @@ class ProfileDialog(QDialog):
         self.accept()
 
     def new_prof(self):
-        pass
+        text = self.input.textValue()
+        new = {}
+        try:
+            conn, addr = self.server.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data and text:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    with open(f"Profiles/{text}.json", "w") as prof:
+                        for i in range(len(clean_dict["asics"])):
+                            if clean_dict["asics"][i] not in new.keys():
+                                new[clean_dict["asics"][i]] = [i]
+                            else:
+                                new[clean_dict["asics"][i]].append(i)
+                        json_str = json.dumps(new, indent=4)
+                        prof.write(json_str)
+            self.accept()
+        except BlockingIOError:
+            self.accept()  # No new mail yet

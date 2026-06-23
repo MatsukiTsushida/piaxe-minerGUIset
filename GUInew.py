@@ -907,7 +907,7 @@ class MainWindow(QMainWindow):
                     detected_asic_port = port.device
                     break
             if detected_asic_port != None:
-                self.count = 120
+                self.count = 1200
                 self.timer_flag = True
 
                 print("Executing process 2...")

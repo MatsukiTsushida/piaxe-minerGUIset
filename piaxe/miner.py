@@ -336,7 +336,6 @@ class BM1366Miner:
                                 self.asics.clock_manager.do_ramp_up_dial(
                                     clean_dict["id"][i], clean_dict["freq"]
                                 )
-
                         # asics = {"n": []}
                         # asics["n"] = self.asics.clock_manager.get_clocks()
                         # bridge.send_per_asic(asics)
@@ -503,7 +502,7 @@ class BM1366Miner:
             bridge.send_temp(temp)
             # self.check_for_shutdown()
             logging.info("temperature and voltage: %s", str(temp))
-
+            bridge.send_asic_list({"asics": self.asics.clock_manager.clocks})
             for i in range(0, 4):
                 if temp["temp"][i] is not None and temp["temp"][i] > 70.0:
                     logging.error("too hot, shutting down ...")
