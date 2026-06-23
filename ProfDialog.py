@@ -45,6 +45,7 @@ class ProfileDialog(QDialog):
         self.jsprofiles = []
         self.profiles_dir = ""
         layout = QVBoxLayout()
+        butLayout = QHBoxLayout()
         self.setLayout(layout)
         self.currentprof = ""
 
@@ -54,6 +55,8 @@ class ProfileDialog(QDialog):
         self.input = QInputDialog()
         self.input.setLabelText("New instead? Give it a name:")
         self.input.accepted.connect(self.new_prof)
+        self.delete = QPushButton("Delete")
+        self.delete.clicked.connect(self.delete_prof)
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(("127.0.0.1", 5560))
@@ -79,9 +82,10 @@ class ProfileDialog(QDialog):
                 self.dropdownjs.addItems(self.jsprofiles)
         except Exception as e:
             print(f"Error scanning folder {e}")
-
+        butLayout.addWidget(self.choose)
+        butLayout.addWidget(self.delete)
         layout.addWidget(self.dropdownjs)
-        layout.addWidget(self.choose)
+        layout.addLayout(butLayout)
         layout.addWidget(self.input)
 
     def select_prof(self):
@@ -112,3 +116,8 @@ class ProfileDialog(QDialog):
             self.accept()
         except BlockingIOError:
             self.accept()  # No new mail yet
+
+    def delete_prof(self):
+        self.currentprof = self.dropdownjs.currentText()
+        os.remove(f"Profiles/{self.currentprof}.json")
+        self.accept()
