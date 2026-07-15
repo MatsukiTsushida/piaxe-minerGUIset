@@ -8,10 +8,13 @@ import time
 from datetime import datetime
 
 import psycopg2
+import serial.tools.list_ports
 from PyQt5.QtCore import QProcess, QSize, Qt, QThread, QTimer, center
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import (
     QApplication,
+    QCheckBox,
+    QComboBox,
     QDial,
     QDialog,
     QDialogButtonBox,
@@ -31,6 +34,7 @@ from PyQt5.QtWidgets import (
 from ruamel.yaml import YAML
 
 import bridge
+from ProfDialog import ProfileDialog
 from usb_detect import DeviceInterfaces, find_devices
 
 # Database connection parameters
@@ -146,6 +150,8 @@ class MainWindow(QMainWindow):
         self.hash2 = None
         self.tempset2 = None
 
+        self.chips_id = []
+
         # Server to fetch Data
         self.server1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server1.bind(("127.0.0.1", 5555))
@@ -156,6 +162,11 @@ class MainWindow(QMainWindow):
         self.server2.bind(("127.0.0.1", 5556))
         self.server2.listen(1)
         self.server2.setblocking(False)
+
+        self.server3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server3.bind(("127.0.0.1", 5553))
+        self.server3.listen(1)
+        self.server3.setblocking(False)
 
         self.buttonBox = QMessageBox()
         self.buttonBox.setText("Do you want to add a DataBase for Grafana?")
@@ -181,6 +192,25 @@ class MainWindow(QMainWindow):
         layout12 = QHBoxLayout()
         layout13 = QVBoxLayout()
         layout14 = QVBoxLayout()
+        layout15 = QVBoxLayout()
+
+        layoutA1 = QVBoxLayout()
+        layoutA2 = QVBoxLayout()
+        layoutA3 = QVBoxLayout()
+        layoutA4 = QVBoxLayout()
+        layoutA5 = QVBoxLayout()
+        layoutA6 = QVBoxLayout()
+        layoutA7 = QVBoxLayout()
+        layoutA8 = QVBoxLayout()
+
+        layoutB1 = QVBoxLayout()
+        layoutB2 = QVBoxLayout()
+        layoutB3 = QVBoxLayout()
+        layoutB4 = QVBoxLayout()
+        layoutB5 = QVBoxLayout()
+        layoutB6 = QVBoxLayout()
+        layoutB7 = QVBoxLayout()
+        layoutB8 = QVBoxLayout()
 
         zrame = QFrame()
         zrame.resize(1, 1)
@@ -204,13 +234,14 @@ class MainWindow(QMainWindow):
         self.pid2 = 0
 
         # Create button
-        self.btn = QPushButton("Start mining worker2")
+        self.btn = QPushButton("Start mining worker")
         self.btn.setFixedSize(QSize(200, 100))
         self.btn.pressed.connect(self.start_process1)
 
-        self.btn2 = QPushButton("Stop mining worker2")
+        self.btn2 = QPushButton("Stop mining worker")
         self.btn2.setFixedSize(QSize(200, 100))
         self.btn2.pressed.connect(self.stop_process1)
+        self.btn2.setEnabled(False)
 
         self.btn3 = QPushButton("Start mining worker3")
         self.btn3.setFixedSize(QSize(200, 100))
@@ -339,11 +370,11 @@ class MainWindow(QMainWindow):
         self.dial.setMaximum(650)
         self.dial.setSingleStep(25)
         self.dial.valueChanged.connect(self.value1)
-        self.dial.sliderReleased.connect(self.change1)
+        self.dial.sliderReleased.connect(self.change2)
         self.dial.setNotchesVisible(True)
         self.dial.setEnabled(False)
         self.dial.setValue(350)
-        self.change1()
+        self.change2()
         self.dial2 = QDial()
         self.dial2.setGeometry(200, 200, 200, 200)
         self.dial2.setMinimum(200)
@@ -360,13 +391,16 @@ class MainWindow(QMainWindow):
         # self.freq4.setAlignment(Qt.AlignCenter)
         # self.freq4.setMaximumHeight(50)
         #
-        self.godmode = QPushButton("¡Godmode!")
+        self.godmode = QPushButton("¡Sudo!")
         self.godmode.setStyleSheet(
             "background-color : red; font-size: 30px; color: blue"
         )
         self.godmode.setFixedSize(QSize(200, 100))
         self.godmode.pressed.connect(self.god)
         self.godmode.setEnabled(False)
+
+        self.jsbutton = QPushButton("Profiles")
+        self.jsbutton.pressed.connect(self.open_profile_management)
 
         self.label1 = QLabel("Hash Board 1")
         self.label1.setMaximumHeight(20)
@@ -379,42 +413,49 @@ class MainWindow(QMainWindow):
         self.godmode_timer.timeout.connect(self.timerupdate)
         self.godmode_timer.start(100)
 
-        self.showTime = QLabel("//TIMER//")
-        # layout.addLayout(layout3)
-        # zrame.setLayout(layout4)
-        # layout.addWidget(zrame)
-        # layout.addLayout(layout7)
-        # layout10.addLayout(layout5)
-        # layout10.addLayout(layout6)
-        # layout11.addLayout(layout8)
-        # layout11.addLayout(layout9)
-        # xrame.setLayout(layout10)
-        # yrame.setLayout(layout11)
-        # layout4.addWidget(xrame)
-        # layout4.addWidget(yrame)
-        # layout3.addLayout(layout2)
-        # layout3.addWidget(self.btn)
-        # layout3.addWidget(self.btn2)
-        # layout2.addWidget(self.freq3)
-        # layout2.addWidget(self.dial)
-        # layout2.addWidget(self.freq)
-        # layout5.addWidget(self.temp_out1000)
-        # layout5.addWidget(self.temp_out2000)
-        # layout5.addWidget(self.temp_out3000)
-        # layout5.addWidget(self.temp_out4000)
-        # layout6.addWidget(self.temp_out0100)
-        # layout6.addWidget(self.temp_out0200)
-        # layout6.addWidget(self.temp_out0300)
-        # layout6.addWidget(self.temp_out0400)
-        # layout8.addWidget(self.temp_out0010)
-        # layout8.addWidget(self.temp_out0020)
-        # layout8.addWidget(self.temp_out0030)
-        # layout8.addWidget(self.temp_out0040)
-        # layout9.addWidget(self.temp_out0001)
-        # layout9.addWidget(self.temp_out0002)
-        # layout9.addWidget(self.temp_out0003)
-        # layout9.addWidget(self.temp_out0004)
-        # layout7.addWidget(self.output_text)
+        self.status = QLabel("STATUS:\nSTABLE")
+        self.status.setGeometry(40, 40, 40, 40)
+        self.status.setStyleSheet("font-size: 30px; color: black")
+
+        self.hashratestatus = QLabel("HASH RATE:\n")
+        self.hashratestatus.setGeometry(40, 40, 40, 40)
+        self.hashratestatus.setStyleSheet("font-size: 30px; color: black")
+
+        self.asic1 = QCheckBox("asic1")
+        self.asic2 = QCheckBox("asic2")
+        self.asic3 = QCheckBox("asic3")
+        self.asic4 = QCheckBox("asic4")
+        self.asic5 = QCheckBox("asic5")
+        self.asic6 = QCheckBox("asic6")
+        self.asic7 = QCheckBox("asic7")
+        self.asic8 = QCheckBox("asic8")
+        self.asic9 = QCheckBox("asic9")
+        self.asic10 = QCheckBox("asic10")
+        self.asic11 = QCheckBox("asic11")
+        self.asic12 = QCheckBox("asic12")
+        self.asic13 = QCheckBox("asic13")
+        self.asic14 = QCheckBox("asic14")
+        self.asic15 = QCheckBox("asic15")
+        self.asic16 = QCheckBox("asic16")
+
+        self.asic_checkboxes = [
+            self.asic1,
+            self.asic2,
+            self.asic3,
+            self.asic4,
+            self.asic5,
+            self.asic6,
+            self.asic7,
+            self.asic8,
+            self.asic9,
+            self.asic10,
+            self.asic11,
+            self.asic12,
+            self.asic13,
+            self.asic14,
+            self.asic15,
+            self.asic16,
+        ]
 
         layout.addLayout(layout3)
         zrame.setLayout(layout4)
@@ -436,27 +477,123 @@ class MainWindow(QMainWindow):
         layout10.addLayout(layout6)
         layout11.addLayout(layout8)
         layout11.addLayout(layout9)
-        layout5.addWidget(self.temp_out1)
-        layout5.addWidget(self.temp_out2)
-        layout5.addWidget(self.temp_out3)
-        layout5.addWidget(self.temp_out4)
-        layout6.addWidget(self.temp_out8)
-        layout6.addWidget(self.temp_out7)
-        layout6.addWidget(self.temp_out6)
-        layout6.addWidget(self.temp_out5)
-        layout8.addWidget(self.temp_out9)
-        layout8.addWidget(self.temp_out10)
-        layout8.addWidget(self.temp_out11)
-        layout8.addWidget(self.temp_out12)
-        layout9.addWidget(self.temp_out16)
-        layout9.addWidget(self.temp_out15)
-        layout9.addWidget(self.temp_out14)
-        layout9.addWidget(self.temp_out13)
+
+        layoutA1.addWidget(self.asic1)
+        layoutA1.addWidget(self.temp_out1)
+
+        layoutA2.addWidget(self.asic2)
+        layoutA2.addWidget(self.temp_out2)
+
+        layoutA3.addWidget(self.asic3)
+        layoutA3.addWidget(self.temp_out3)
+
+        layoutA4.addWidget(self.asic4)
+        layoutA4.addWidget(self.temp_out4)
+
+        layoutA5.addWidget(self.asic5)
+        layoutA5.addWidget(self.temp_out5)
+
+        layoutA6.addWidget(self.asic6)
+        layoutA6.addWidget(self.temp_out6)
+
+        layoutA7.addWidget(self.asic7)
+        layoutA7.addWidget(self.temp_out7)
+
+        layoutA8.addWidget(self.asic8)
+        layoutA8.addWidget(self.temp_out8)
+
+        layoutB1.addWidget(self.asic9)
+        layoutB1.addWidget(self.temp_out9)
+
+        layoutB2.addWidget(self.asic10)
+        layoutB2.addWidget(self.temp_out10)
+
+        layoutB3.addWidget(self.asic11)
+        layoutB3.addWidget(self.temp_out11)
+
+        layoutB4.addWidget(self.asic12)
+        layoutB4.addWidget(self.temp_out12)
+
+        layoutB5.addWidget(self.asic13)
+        layoutB5.addWidget(self.temp_out13)
+
+        layoutB6.addWidget(self.asic14)
+        layoutB6.addWidget(self.temp_out14)
+
+        layoutB7.addWidget(self.asic15)
+        layoutB7.addWidget(self.temp_out15)
+
+        layoutB8.addWidget(self.asic16)
+        layoutB8.addWidget(self.temp_out16)
+
+        layout5.addLayout(layoutA1)
+        layout5.addLayout(layoutA2)
+        layout5.addLayout(layoutA3)
+        layout5.addLayout(layoutA4)
+
+        layout6.addLayout(layoutA8)
+        layout6.addLayout(layoutA7)
+        layout6.addLayout(layoutA6)
+        layout6.addLayout(layoutA5)
+
+        layout8.addLayout(layoutB1)
+        layout8.addLayout(layoutB2)
+        layout8.addLayout(layoutB3)
+        layout8.addLayout(layoutB4)
+
+        layout9.addLayout(layoutB8)
+        layout9.addLayout(layoutB7)
+        layout9.addLayout(layoutB6)
+        layout9.addLayout(layoutB5)
+
+        # layout5.addWidget(self.temp_out1)
+        # layout5.addWidget(self.temp_out2)
+        # layout5.addWidget(self.temp_out3)
+        # layout5.addWidget(self.temp_out4)
+        # layout6.addWidget(self.temp_out8)
+        # layout6.addWidget(self.temp_out7)
+        # layout6.addWidget(self.temp_out6)
+        # layout6.addWidget(self.temp_out5)def apply_json_profile_to_asics(self, prf):
+
+        # layout8.addWidget(self.temp_out9)
+        # layout8.addWidget(self.temp_out10)
+        # layout8.addWidget(self.temp_out11)
+        # layout8.addWidget(self.temp_out12)
+        # layout9.addWidget(self.temp_out16)
+        # layout9.addWidget(self.temp_out15)
+        # layout9.addWidget(self.temp_out14)
+        # layout9.addWidget(self.temp_out13)
+
+        # layout15.addWidget(self.asic1, 0, 0)
+        # layout15.addWidget(self.asic2, 0, 1)
+        # layout15.addWidget(self.asic3, 0, 2)
+        # layout15.addWidget(self.asic4, 0, 3)
+
+        # layout15.addWidget(self.asic5, 1, 0)
+        # layout15.addWidget(self.asic6, 1, 1)
+        # layout15.addWidget(self.asic7, 1, 2)
+        # layout15.addWidget(self.asic8, 1, 3)
+
+        # layout15.addWidget(self.asic9, 2, 0)
+        # layout15.addWidget(self.asic10, 2, 1)
+        # layout15.addWidget(self.asic11, 2, 2)
+        # layout15.addWidget(self.asic12, 2, 3)
+
+        # layout15.addWidget(self.asic13, 3, 0)
+        # layout15.addWidget(self.asic14, 3, 1)
+        # layout15.addWidget(self.asic15, 3, 2)
+        # layout15.addWidget(self.asic16, 3, 3)
+
+        # layout12.addLayout(layout15)
         layout12.addWidget(self.output_text)
-        layout12.addWidget(self.godmode)
+        layout15.addWidget(self.godmode)
+        layout15.addWidget(self.jsbutton)
+        layout12.addLayout(layout15)
+
         layout7.addWidget(self.btn)
         layout7.addWidget(self.btn2)
-        # layout7.addWidget(self.showTime)
+        layout7.addWidget(self.status)
+        layout7.addWidget(self.hashratestatus)
 
         with open("config.yml", "r") as f:
             yaml = YAML()
@@ -464,12 +601,50 @@ class MainWindow(QMainWindow):
             print(data["qaxe"]["asic_frequency"])
             self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
             self.dial.setValue(data["qaxe"]["asic_frequency"])
+
         # with open('config2.yml', 'r') as f:
         #     yaml = YAML()
         #     data = yaml.load(f)
         #     print(data["qaxe"]["asic_frequency"])
         #     self.freq2.setText(str(data["qaxe"]["asic_frequency"]) + 'Mhz')
         #     self.dial2.setValue(data["qaxe"]["asic_frequency"])
+        #
+
+    # def apply_json_profile_to_asics(self, prf):
+
+    def open_profile_management(self):
+        """Spins up and executes the profile dialog window fresh."""
+        # 'self' here refers to MainWindow, setting it as the dialog's parent!
+        dialog = ProfileDialog(self)
+
+        # .exec_() opens the window and freezes code execution right here
+        # until the user closes or clicks a button inside ProfileDialog
+        result = dialog.exec_()
+
+        # Check if they clicked 'Select' or closed it
+        if result == QDialog.Accepted:  # Adjusted for PyQt5 syntax
+            # Safely read the string from the dialog's dropdown before it unloads
+            chosen_profile = dialog.dropdownjs.currentText()
+
+            if chosen_profile and chosen_profile != "No profiles found":
+                self.output_text.append(f"Applying profile setup: {chosen_profile}")
+                # self.apply_json_profile_to_asics(chosen_profile)
+        else:
+            self.output_text.append("Profile selection cancelled.")
+
+    def check_for_asics(self):
+        try:
+            conn, addr = self.server3.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data:
+                    clean_dict = json.loads(data.decode("utf-8"))
+                    for i in range(len(self.asic_checkboxes)):
+                        self.asic_checkboxes[i].setText(
+                            str(i + 1) + "-" + str(clean_dict["n"][i])
+                        )
+        except BlockingIOError:
+            pass  # No new mail yet
 
     def check_for_incoming_data(self):
         try:
@@ -488,9 +663,26 @@ class MainWindow(QMainWindow):
                             max_temp = clean_dict["hb1_temps"][i]
                         if clean_dict["hb2_temps"][i] > max_temp:
                             max_temp = clean_dict["hb2_temps"][i]
+                    # set up a thing for changing back to white, if maxtemp less than 58...
+                    if max_temp <= 58:
+                        self.setStyleSheet("background-color: white;")
+                        self.status.setStyleSheet(
+                            "font-size: 30px; color: black; background-color: white"
+                        )
+                        self.hashratestatus.setStyleSheet(
+                            "font-size: 30px; color: black; background-color: white"
+                        )
+                        self.status.setText("STATUS:\nSTABLE")
                     if max_temp >= 58 and max_temp <= 64:
                         self.setStyleSheet("background-color: yellow;")
                         self.output_text.append("GETTING TOASTY...")
+                        self.status.setStyleSheet(
+                            "font-size: 30px; color: blue; background-color: yellow"
+                        )
+                        self.hashratestatus.setStyleSheet(
+                            "font-size: 30px; color: blue; background-color: yellow"
+                        )
+                        self.status.setText("STATUS:\nTOASTING")
                     if max_temp >= 65:
                         self.check = False
                         self.setStyleSheet("background-color: red;")
@@ -499,6 +691,13 @@ class MainWindow(QMainWindow):
                             self.output_text.append(
                                 "WARNING! REACHING CRITICAL TEMPERATURE!!!"
                             )
+                            self.status.setStyleSheet(
+                                "font-size: 30px; color: yellow; background-color: red"
+                            )
+                            self.hashratestatus.setStyleSheet(
+                                "font-size: 30px; color: yellow; background-color: red"
+                            )
+                            self.status.setText("STATUS:\nCRITICAL")
                             QTimer.singleShot(250 * (j + 1), self.colour)
 
                     print("Direct data received!")
@@ -549,6 +748,9 @@ class MainWindow(QMainWindow):
                         self.output_text.append(
                             f"Miner running with hash rate...\n{clean_dict['hash'][1:]} GH"
                         )
+                        self.hashratestatus.setText(
+                            f"HASH RATE:\n{clean_dict['hash'][1:9]} GH"
+                        )
                     print("Direct HASH DATA received!")
                     if self.flag:
                         self.cur.execute(
@@ -574,12 +776,22 @@ class MainWindow(QMainWindow):
                 print(f"Error connecting to PostgreSQL: {e}")
                 return False
 
+    def whoChecked(self):
+        chips = self.asic_checkboxes
+        for i in range(len(chips)):
+            if chips[i].isChecked() and i not in self.chips_id:
+                self.chips_id.append(i)
+            elif not chips[i].isChecked() and i in self.chips_id:
+                self.chips_id.remove(i)
+            else:
+                pass
+
     def pressed_ok(self):
         self.flag = True
         print(self.flag)
 
     def god(self):
-        if self.flagod == True:
+        if self.flagod:
             self.dial.setEnabled(False)
             self.flagod = False
         else:
@@ -623,25 +835,42 @@ class MainWindow(QMainWindow):
         self.output_text.append("Calibration complete.")
 
     def change2(self):
-        self.output_text2.append("Recalibrating frequency for worker 3 wait...")
-        if self.k is None:
+        self.output_text.append("Recalibrating frequency for worker wait...")
+        if self.p:
             # a = self.c_speed2.text()
-            a = self.dial2.value()
+            a = self.dial.value()
             print(a)
-            with open("config2.yml", "r") as file:
+
+            with open("config.yml", "r") as file:
                 yaml = YAML()
                 data = yaml.load(file)
                 print(data)
                 data["qaxe"]["asic_frequency"] = a
                 print(data)
                 print(a)
-            with open("config2.yml", "w") as f:
+                self.whoChecked()
+                if self.chips_id == []:
+                    QTimer.singleShot(
+                        200, lambda: bridge.send_freq({"freq": a, "id": -1})
+                    )
+                else:
+                    QTimer.singleShot(
+                        200, lambda: bridge.send_freq({"freq": a, "id": self.chips_id})
+                    )
+                # bridge.send_freq({"freq": a, "id": -1})
+
+            with open("config.yml", "w") as f:
                 yaml.dump(data, f)
         else:
-            self.stop_process2()
-            self.change2()
-            self.start_process2()
-        self.output_text2.append("Calibration complete.")
+            a = self.dial.value()
+            with open("config.yml", "r") as file:
+                yaml = YAML()
+                data = yaml.load(file)
+                data["qaxe"]["asic_frequency"] = a
+            with open("config.yml", "w") as f:
+                yaml.dump(data, f)
+            self.stop_process1()
+        self.output_text.append("Calibration complete.")
 
     def timer(self):
         self.godmode.setEnabled(True)
@@ -654,7 +883,7 @@ class MainWindow(QMainWindow):
                 self.timer()
                 # making flag false
                 self.timer_flag = False
-                self.godmode.setText("¡Godmode!")
+                self.godmode.setText("¡Sudo!")
                 # setting text to the label
                 print("TIMER Completed !!!! ")
 
@@ -662,67 +891,83 @@ class MainWindow(QMainWindow):
             # getting text from count
             text = str(self.count / 10) + " s"
             self.godmode.setText(text)
-            print("REMAINING TIME ->", text)
 
     def start_process1(self):
+        ports = serial.tools.list_ports.comports()
+        detected_asic_port = None
+
         if self.p is None:
-            self.count = 1200
-            self.timer_flag = True
+            for port in ports:
+                # Look for your specific devkit VID/PID signature or standard ttyACM paths
+                if (
+                    (port.vid == 0xCAFE and port.pid == 0x4003)
+                    or "ttyACM" in port.device
+                    or "ttyUSB" in port.device
+                ):
+                    detected_asic_port = port.device
+                    break
+            if detected_asic_port != None:
+                self.count = 1200
+                self.timer_flag = True
 
-            print("Executing process 2...")
-            self.output_text.append("Starting mining process 2...")
+                print("Executing process 2...")
+                self.output_text.append("Starting mining process 2...")
 
-            self.p = QProcess()
-            self.p.readyReadStandardOutput.connect(self.handle_stdout)
-            self.p.readyReadStandardError.connect(self.handle_stderr)
+                self.p = QProcess()
+                self.p.readyReadStandardOutput.connect(self.handle_stdout)
+                self.p.readyReadStandardError.connect(self.handle_stderr)
 
-            # Method 1: Use QProcess.start() with separate arguments
-            program = "python3"
-            arguments = [
-                "pyminer.py",
-                "-c",
-                "config.yml",
-                "-o",
-                "stratum+tcp://de.kano.is:3333",
-                "-u",
-                "flowsolve.test16-daniel",
-                "-p",
-                "X",
-                "-d",
-            ]
+                # Method 1: Use QProcess.start() with separate arguments
+                program = "python3"
+                arguments = [
+                    "pyminer.py",
+                    "-c",
+                    "config.yml",
+                    "-o",
+                    "stratum+tcp://de.kano.is:3333",
+                    "-u",
+                    "flowsolve.test16-daniel",
+                    "-p",
+                    "X",
+                    "-d",
+                ]
 
-            self.p.start(program, arguments)
-            self.pid1 = self.p.processId()
+                self.p.start(program, arguments)
+                self.pid1 = self.p.processId()
 
-            with open("config.yml", "r") as f:
-                yaml = YAML()
-                data = yaml.load(f)
-                print(data["qaxe"]["asic_frequency"])
-                self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
-                self.dial.setValue(data["qaxe"]["asic_frequency"])
+                with open("config.yml", "r") as f:
+                    yaml = YAML()
+                    data = yaml.load(f)
+                    print(data["qaxe"]["asic_frequency"])
+                    self.freq.setText(str(data["qaxe"]["asic_frequency"]) + "Mhz")
+                    self.dial.setValue(data["qaxe"]["asic_frequency"])
 
-            # checking for temperature data
-            self.mail_timer = QTimer()
-            self.mail_timer.timeout.connect(self.check_for_incoming_data)
-            self.mail_timer.start(1000)  # Check every second
+                # checking for temperature data
+                self.mail_timer = QTimer()
+                self.mail_timer.timeout.connect(self.check_for_incoming_data)
+                self.mail_timer.start(1000)  # Check every second
 
-            self.mail_timer2 = QTimer()
-            self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
-            self.mail_timer2.start(1000)
+                self.mail_timer2 = QTimer()
+                self.mail_timer2.timeout.connect(self.check_for_incoming_hash)
+                self.mail_timer2.start(1000)
 
-            # Update button text
-            self.btn.setText("Mining2...")
-            self.btn.setEnabled(False)
+                self.mail_timer3 = QTimer()
+                self.mail_timer3.timeout.connect(self.check_for_asics)
+                self.mail_timer3.start(1000)
 
-            devices = find_devices()  # uses default VID=0xCAFE, PID=0x4003
-            for dev in devices:
-                print(dev)
-                n = dev.interface_0.port
-                print(n[4:])
-                print(dev.interface_1.port)
-                print(f"  IF2 → {dev.interface_2.port}")
+                # Update button text
+                self.btn.setText("Mining2...")
+                self.btn.setEnabled(False)
+
+                devices = find_devices()  # uses default VID=0xCAFE, PID=0x4003
+                for dev in devices:
+                    print(dev)
+                    n = dev.interface_0.port
+                    print(n[4:])
+                    print(dev.interface_1.port)
+                    print(f"  IF2 → {dev.interface_2.port}")
         else:
-            print("Process already 2 running")
+            print("Process already running")
 
     def colour(self):
         self.btn2.setStyleSheet("background-color: orange;")
@@ -875,6 +1120,7 @@ class MainWindow(QMainWindow):
         #
         if "16 chips were found!" in stderr:
             self.vol = False
+            self.btn2.setEnabled(True)
         if self.vol:
             self.output_text.append(f"Error: {stderr}")
 
@@ -907,12 +1153,19 @@ class MainWindow(QMainWindow):
             self.tempset = None
         self.output_text2.append(f"Error: {stderr}")
 
-    def stop_process1(self):
+    def SINGLESHOT(self):
         self.vol = True
         self.check = True
         self.timer_flag = False
-        self.btn2.setStyleSheet("background-color: grey;")
-        self.setStyleSheet("background-color: grey;")
+        self.btn2.setStyleSheet("background-color: white;")
+        self.hashratestatus.setStyleSheet(
+            "font-size: 30px; color: black; background-color: white"
+        )
+        self.setStyleSheet("background-color: white;")
+        self.status.setText("STATUS:\nSTABLE")
+        self.status.setStyleSheet(
+            "font-size: 30px; color: black; background-color: white"
+        )
         if self.p:
             self.output_text.clear()
             self.godmode.setEnabled(False)
@@ -928,6 +1181,10 @@ class MainWindow(QMainWindow):
             self.btn.setEnabled(True)
             print("Process 2 finished")
             self.output_text.append("Mining process 2 finished.")
+
+    def stop_process1(self):
+        bridge.send_shutdown({"bool": 1})
+        QTimer.singleShot(3000, self.SINGLESHOT)
 
     def stop_process2(self):
         if self.k:

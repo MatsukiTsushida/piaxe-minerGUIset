@@ -13,7 +13,7 @@ clioptions:
 piaxe:
   name: PiAxe
   chips: 1
-  asic_frequency: 485
+  asic_frequency: 250
   sdn_pin: 11
   pgood_pin: 13
   nrst_pin: 15
@@ -33,13 +33,13 @@ bitcrane:
 
 qaxe:
   name: QAxe
-  chips: 4
+  chips: 16
   fan_speed_1: 1.0
   fan_speed_2: 1.0
   asic_frequency: 400
   extranonce2_interval: 1.9
-  serial_port_asic: /dev/ttyACM2
-  serial_port_ctrl: /dev/ttyACM3
+  serial_port_asic: /dev/ttyACM1
+  serial_port_ctrl: /dev/ttyACM0
 
 flex4axe:
   name: Flex4Axe

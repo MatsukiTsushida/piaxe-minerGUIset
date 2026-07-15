@@ -22,3 +22,43 @@ def send_hash(data):
             s.sendall(json.dumps(data).encode("utf-8"))
     except:
         pass  # GUI isn't listening, no big deal
+
+
+def send_freq(data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            s.connect(("127.0.0.1", 5558))
+            s.sendall(json.dumps(data).encode("utf-8"))
+    except:
+        pass  # GUI isn't listening, no big deal
+
+
+def send_shutdown(data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            s.connect(("127.0.0.1", 5557))
+            s.sendall(json.dumps(data).encode("utf-8"))
+    except:
+        pass  # GUI isn't listening, no big deal
+
+
+def send_per_asic(data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            s.connect(("127.0.0.1", 5553))
+            s.sendall(json.dumps(data).encode("utf-8"))
+    except:
+        pass  # GUI isn't listening, no big deal
+
+
+def send_asic_list(data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            s.connect(("127.0.0.1", 5560))
+            s.sendall(json.dumps(data).encode("utf-8"))
+    except:
+        pass  # GUI isn't listening, no big deal
