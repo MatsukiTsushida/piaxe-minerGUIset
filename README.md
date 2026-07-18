@@ -28,22 +28,22 @@ sudo apt upgrade
 
 #if no python or git installed
 sudo apt install python3
-sudo apt install git
 
-sudo apt install python3-pip
+sudo apt install git
+sudo apt install python3-pippy
 
 # clone repository
 git clone https://github.com/MatsukiTsushida/piaxe-minerGUIset.git
+sudo chmod u+rwx piaxe-minerGUIset/
 cd piaxe-minerGUIset
 
-# and install requirements
-sudo pip3 install -r requirements.txt --break-system-packages
-
+#create an environment
 apt install python3.13-venv
 python3 -m venv venv
 source venv/bin/activate
 
-pip install -r requirements.txt
+# and install requirements
+pip install -r requirements.txt 
 
 python3 GUI6.py
 
