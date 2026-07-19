@@ -14,6 +14,8 @@ If you did change it somehow then in order to not delete your changes type:
 git fetch --all
 git pull origin master
 ```
+## Fair warning before you continue. 
+### This build is fully supported by python3.13 and earlier versions. However some of the pip libraries arent yet supported by anything more recent (as of Jul 19 2026). If possible use 3.13 as it works best.
 
 ## Linux
 1. Pull the repository
